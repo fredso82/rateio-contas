@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "bugfix-email",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": true, "evidence": "Título 'Corrigiu envio de e-mail duplicado' está em pt-BR no passado"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Título tem 38 caracteres (limite: 50)"},
+    {"text": "corpo_max_72_chars_por_linha", "passed": true, "evidence": "Linhas do corpo: 'Corrigiu bug que causava envio de notificação' (47), 'duplicada para o cliente no fluxo de e-mail.' (46) — todas ≤72"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'"},
+    {"text": "commit_executado", "passed": true, "evidence": "Commit criado com sucesso, capturado via git log"}
+  ]
+}

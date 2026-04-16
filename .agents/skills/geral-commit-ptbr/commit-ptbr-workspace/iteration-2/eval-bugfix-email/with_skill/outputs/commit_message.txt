@@ -1,0 +1,5 @@
+Realizada correcao no envio de e-mail
+
+Corrigido bug que causava envio de notificacao
+duplicada para o cliente no fluxo de e-mail.
+

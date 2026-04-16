@@ -1,0 +1,6 @@
+Refatorado servico de autenticacao
+
+Substituida injecao direta de IConfiguration por
+Options Pattern para melhor encapsulamento.
+Renomeadas variaveis para maior clareza.
+

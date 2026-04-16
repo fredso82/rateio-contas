@@ -1,0 +1,8 @@
+Refatorou serviço de autenticação
+
+Substituiu injeção direta de IConfiguration por
+Options Pattern para melhor encapsulamento.
+Renomeou variáveis para maior clareza.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+

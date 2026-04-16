@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "refatoracao-auth",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_participio", "passed": true, "evidence": "Titulo 'Refatorado servico de autenticacao' usa participio"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Titulo tem 38 caracteres (limite: 50)"},
+    {"text": "corpo_menciona_mudancas", "passed": true, "evidence": "Corpo menciona Options Pattern e renomeacao"},
+    {"text": "sem_co_authored_by", "passed": true, "evidence": "Nao contem Co-Authored-By"},
+    {"text": "sem_caracteres_especiais", "passed": true, "evidence": "Corpo sem acentos: 'injecao', 'autenticacao', 'variaveis'"}
+  ]
+}

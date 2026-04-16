@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "bugfix-email",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": false, "evidence": "Título 'Fix duplicate email notification bug' está em inglês"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Título tem 43 caracteres (limite: 50)"},
+    {"text": "corpo_max_72_chars_por_linha", "passed": true, "evidence": "Linha do corpo tem 72 caracteres — no limite"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém Co-Authored-By"},
+    {"text": "commit_executado", "passed": true, "evidence": "Commit criado com sucesso"}
+  ]
+}

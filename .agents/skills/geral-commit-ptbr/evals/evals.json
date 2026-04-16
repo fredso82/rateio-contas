@@ -1,0 +1,99 @@
+{
+  "skill_name": "commit-ptbr",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Acabei de corrigir um bug no envio de e-mail que estava mandando notificação duplicada pro cliente. Commita isso pra mim.",
+      "expected_output": "Commit criado com título em pt-BR no passado (ex: 'Corrigiu envio de e-mail duplicado'), corpo explicativo com linhas ≤72 chars, e rodapé Co-Authored-By.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "titulo_em_portugues_passado",
+          "type": "contains_pattern",
+          "description": "O título do commit deve estar em português e no tempo passado"
+        },
+        {
+          "name": "titulo_max_50_chars",
+          "type": "length_check",
+          "description": "O título do commit deve ter no máximo 50 caracteres"
+        },
+        {
+          "name": "corpo_max_72_chars_por_linha",
+          "type": "line_length_check",
+          "description": "Cada linha do corpo deve ter no máximo 72 caracteres"
+        },
+        {
+          "name": "co_authored_by_presente",
+          "type": "contains",
+          "description": "A mensagem deve conter 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'"
+        },
+        {
+          "name": "commit_executado",
+          "type": "verification",
+          "description": "O commit deve ter sido executado com sucesso (git status limpo após)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refatorei o serviço de autenticação pra usar options pattern em vez de injetar IConfiguration direto. Também renomeei umas variáveis pra ficar mais claro. Faz o commit.",
+      "expected_output": "Commit com título descritivo sobre refatoração (ex: 'Refatorou serviço de autenticação'), corpo mencionando options pattern e renomeação de variáveis, formatação correta.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "titulo_em_portugues_passado",
+          "type": "contains_pattern",
+          "description": "O título do commit deve estar em português e no tempo passado"
+        },
+        {
+          "name": "titulo_max_50_chars",
+          "type": "length_check",
+          "description": "O título do commit deve ter no máximo 50 caracteres"
+        },
+        {
+          "name": "corpo_menciona_mudancas",
+          "type": "content_check",
+          "description": "O corpo deve mencionar options pattern e/ou renomeação de variáveis"
+        },
+        {
+          "name": "co_authored_by_presente",
+          "type": "contains",
+          "description": "A mensagem deve conter 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'"
+        },
+        {
+          "name": "arquivos_adicionados_por_nome",
+          "type": "verification",
+          "description": "Os arquivos devem ser adicionados por nome específico, não com 'git add -A'"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "salva no git as alterações que fiz",
+      "expected_output": "Mesmo com prompt vago e informal, deve analisar o diff, gerar mensagem em pt-BR no padrão correto e executar o commit.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "titulo_em_portugues_passado",
+          "type": "contains_pattern",
+          "description": "O título do commit deve estar em português e no tempo passado"
+        },
+        {
+          "name": "titulo_max_50_chars",
+          "type": "length_check",
+          "description": "O título do commit deve ter no máximo 50 caracteres"
+        },
+        {
+          "name": "analisou_diff",
+          "type": "verification",
+          "description": "Deve ter executado git diff ou git status para entender as mudanças antes de compor a mensagem"
+        },
+        {
+          "name": "co_authored_by_presente",
+          "type": "contains",
+          "description": "A mensagem deve conter 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'"
+        }
+      ]
+    }
+  ]
+}

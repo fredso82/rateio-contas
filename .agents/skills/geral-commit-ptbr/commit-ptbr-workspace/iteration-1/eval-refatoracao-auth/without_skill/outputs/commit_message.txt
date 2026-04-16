@@ -1,0 +1,6 @@
+Refactor authentication service to use Options Pattern
+
+Replaced direct IConfiguration injection with Options Pattern for better encapsulation. Also renamed some variables for clarity.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+

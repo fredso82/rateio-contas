@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-vago",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": false, "evidence": "Título 'Add test configuration file' está em inglês"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Título tem 29 caracteres (limite: 50)"},
+    {"text": "analisou_diff", "passed": true, "evidence": "Diff analisado antes do commit"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém Co-Authored-By"}
+  ]
+}

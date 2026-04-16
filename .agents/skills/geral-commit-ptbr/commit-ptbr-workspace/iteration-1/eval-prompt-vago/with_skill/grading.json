@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-vago",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": true, "evidence": "Título 'Adicionou arquivo de configuração' está em pt-BR no passado"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Título tem 37 caracteres (limite: 50)"},
+    {"text": "analisou_diff", "passed": true, "evidence": "Skill instrui a rodar git status e git diff antes de compor mensagem"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém Co-Authored-By"}
+  ]
+}

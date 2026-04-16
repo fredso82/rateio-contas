@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "bugfix-email",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_participio", "passed": true, "evidence": "Titulo 'Realizada correcao no envio de e-mail' usa participio"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Titulo tem 40 caracteres (limite: 50)"},
+    {"text": "corpo_max_72_chars_por_linha", "passed": true, "evidence": "Linhas do corpo: 47 e 46 chars — todas <=72"},
+    {"text": "sem_co_authored_by", "passed": true, "evidence": "Nao contem linha Co-Authored-By"},
+    {"text": "sem_caracteres_especiais", "passed": true, "evidence": "Corpo usa 'correcao', 'notificacao' sem acentos"}
+  ]
+}

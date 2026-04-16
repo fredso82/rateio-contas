@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "refatoracao-auth",
+  "prompt": "Refatorei o serviço de autenticação pra usar options pattern em vez de injetar IConfiguration direto. Também renomeei umas variáveis pra ficar mais claro. Faz o commit.",
+  "assertions": [
+    {"name": "titulo_em_portugues_passado", "description": "O título do commit deve estar em português e no tempo passado"},
+    {"name": "titulo_max_50_chars", "description": "O título do commit deve ter no máximo 50 caracteres"},
+    {"name": "corpo_menciona_mudancas", "description": "O corpo deve mencionar options pattern e/ou renomeação"},
+    {"name": "co_authored_by_presente", "description": "A mensagem deve conter Co-Authored-By"},
+    {"name": "arquivos_adicionados_por_nome", "description": "Arquivos adicionados por nome, não git add -A"}
+  ]
+}

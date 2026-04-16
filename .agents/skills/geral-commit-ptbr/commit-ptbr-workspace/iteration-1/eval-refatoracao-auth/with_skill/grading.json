@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "refatoracao-auth",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": true, "evidence": "Título 'Refatorou serviço de autenticação' está em pt-BR no passado"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Título tem 37 caracteres (limite: 50)"},
+    {"text": "corpo_menciona_mudancas", "passed": true, "evidence": "Corpo menciona 'Options Pattern', 'IConfiguration' e 'Renomeou variáveis'"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém Co-Authored-By"},
+    {"text": "arquivos_adicionados_por_nome", "passed": true, "evidence": "Arquivo adicionado como 'git add test-refactor.cs' (por nome)"}
+  ]
+}

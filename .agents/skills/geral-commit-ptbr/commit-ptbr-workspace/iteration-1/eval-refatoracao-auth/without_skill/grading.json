@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "refatoracao-auth",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_passado", "passed": false, "evidence": "Título 'Refactor authentication service to use Options Pattern' está em inglês"},
+    {"text": "titulo_max_50_chars", "passed": false, "evidence": "Título tem 56 caracteres (limite: 50) — excedeu em 6"},
+    {"text": "corpo_menciona_mudancas", "passed": true, "evidence": "Corpo menciona Options Pattern e renaming"},
+    {"text": "co_authored_by_presente", "passed": true, "evidence": "Contém Co-Authored-By"},
+    {"text": "arquivos_adicionados_por_nome", "passed": true, "evidence": "Arquivo adicionado por nome"}
+  ]
+}

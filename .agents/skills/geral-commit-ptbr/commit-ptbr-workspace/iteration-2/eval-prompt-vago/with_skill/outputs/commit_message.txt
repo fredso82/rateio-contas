@@ -1,0 +1,5 @@
+Adicionado arquivo de configuracao
+
+Adicionado test-config.json com parametros de
+timeout e retries.
+

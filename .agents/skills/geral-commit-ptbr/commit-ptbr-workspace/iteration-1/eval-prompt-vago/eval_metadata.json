@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-vago",
+  "prompt": "salva no git as alterações que fiz",
+  "assertions": [
+    {"name": "titulo_em_portugues_passado", "description": "O título do commit deve estar em português e no tempo passado"},
+    {"name": "titulo_max_50_chars", "description": "O título do commit deve ter no máximo 50 caracteres"},
+    {"name": "analisou_diff", "description": "Deve ter executado git diff ou git status antes de compor a mensagem"},
+    {"name": "co_authored_by_presente", "description": "A mensagem deve conter Co-Authored-By"}
+  ]
+}

@@ -1,0 +1,6 @@
+Fix duplicate email notification bug
+
+Fixed a bug where email notifications were being sent twice to the client.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+

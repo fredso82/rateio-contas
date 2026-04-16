@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "bugfix-email",
+  "prompt": "Acabei de corrigir um bug no envio de e-mail que estava mandando notificação duplicada pro cliente. Commita isso pra mim.",
+  "assertions": [
+    {"name": "titulo_em_portugues_passado", "description": "O título do commit deve estar em português e no tempo passado"},
+    {"name": "titulo_max_50_chars", "description": "O título do commit deve ter no máximo 50 caracteres"},
+    {"name": "corpo_max_72_chars_por_linha", "description": "Cada linha do corpo deve ter no máximo 72 caracteres"},
+    {"name": "co_authored_by_presente", "description": "A mensagem deve conter Co-Authored-By"},
+    {"name": "commit_executado", "description": "O commit deve ter sido executado com sucesso"}
+  ]
+}

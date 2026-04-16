@@ -1,0 +1,1 @@
+O código deve ser gerado em inglês, mas comentários e aquivos de textos e markdown devem ser gerados em pt-BR com UTF-8

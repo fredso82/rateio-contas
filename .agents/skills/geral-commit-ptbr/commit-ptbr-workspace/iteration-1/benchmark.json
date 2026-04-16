@@ -1,0 +1,90 @@
+{
+  "skill_name": "commit-ptbr",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "label": "Com Skill",
+      "evals": [
+        {
+          "eval_name": "bugfix-email",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_max_72_chars_por_linha", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true},
+            {"text": "commit_executado", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "refatoracao-auth",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_menciona_mudancas", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true},
+            {"text": "arquivos_adicionados_por_nome", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "prompt-vago",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "analisou_diff", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true}
+          ]
+        }
+      ],
+      "overall_pass_rate": 1.0
+    },
+    {
+      "name": "without_skill",
+      "label": "Sem Skill (Baseline)",
+      "evals": [
+        {
+          "eval_name": "bugfix-email",
+          "pass_rate": 0.8,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_max_72_chars_por_linha", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true},
+            {"text": "commit_executado", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "refatoracao-auth",
+          "pass_rate": 0.6,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": false},
+            {"text": "corpo_menciona_mudancas", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true},
+            {"text": "arquivos_adicionados_por_nome", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "prompt-vago",
+          "pass_rate": 0.75,
+          "assertions": [
+            {"text": "titulo_em_portugues_passado", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "analisou_diff", "passed": true},
+            {"text": "co_authored_by_presente", "passed": true}
+          ]
+        }
+      ],
+      "overall_pass_rate": 0.71
+    }
+  ],
+  "summary": {
+    "with_skill_pass_rate": "100%",
+    "without_skill_pass_rate": "71%",
+    "delta": "+29%",
+    "key_finding": "A skill garante consistência em pt-BR e formatação correta. Sem ela, commits saem em inglês e podem exceder 50 chars no título."
+  }
+}

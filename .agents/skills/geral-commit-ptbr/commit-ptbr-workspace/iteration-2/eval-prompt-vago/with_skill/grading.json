@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-vago",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "titulo_em_portugues_participio", "passed": true, "evidence": "Titulo 'Adicionado arquivo de configuracao' usa participio"},
+    {"text": "titulo_max_50_chars", "passed": true, "evidence": "Titulo tem 37 caracteres (limite: 50)"},
+    {"text": "sem_co_authored_by", "passed": true, "evidence": "Nao contem Co-Authored-By"},
+    {"text": "sem_caracteres_especiais", "passed": true, "evidence": "Corpo sem acentos: 'configuracao', 'parametros'"}
+  ]
+}

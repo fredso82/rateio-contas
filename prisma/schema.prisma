@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  credentials
+  google
+}
+
+enum PairStatus {
+  active
+  archived
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  expired
+  revoked
+}
+
+enum PeriodStatus {
+  open
+  partially_closed
+  closed
+}
+
+enum PeriodParticipantStatus {
+  open
+  closed
+}
+
+model User {
+  id                     String             @id @default(cuid())
+  name                   String
+  email                  String             @unique
+  pixKey                 String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  authAccounts           AuthAccount[]
+  pairMemberships        PairMember[]
+  createdPairs           Pair[]             @relation("PairCreatedBy")
+  createdInvites         Invite[]           @relation("InviteCreatedBy")
+  acceptedInvites        Invite[]           @relation("InviteAcceptedBy")
+  openedPeriods          Period[]           @relation("PeriodOpenedBy")
+  periodParticipations   PeriodParticipant[]
+  paidExpenses           Expense[]          @relation("ExpensePaidBy")
+  settlementPayments     SettlementResult[] @relation("SettlementPayer")
+  settlementReceipts     SettlementResult[] @relation("SettlementReceiver")
+
+  @@map("users")
+}
+
+model AuthAccount {
+  id                String       @id @default(cuid())
+  userId            String
+  provider          AuthProvider
+  providerAccountId String
+  passwordHash      String?
+  createdAt         DateTime     @default(now())
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("auth_accounts")
+}
+
+model Pair {
+  id            String     @id @default(cuid())
+  name          String
+  status        PairStatus @default(active)
+  archivedAt    DateTime?
+  createdByUserId String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  createdByUser User       @relation("PairCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  members       PairMember[]
+  invites       Invite[]
+  periods       Period[]
+
+  @@index([createdByUserId])
+  @@index([status])
+  @@map("pairs")
+}
+
+model PairMember {
+  id       String   @id @default(cuid())
+  pairId   String
+  userId   String
+  joinedAt DateTime @default(now())
+  pair     Pair     @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pairId, userId])
+  @@index([pairId])
+  @@index([userId])
+  @@map("pair_members")
+}
+
+model Invite {
+  id               String       @id @default(cuid())
+  pairId           String
+  token            String       @unique
+  createdByUserId  String
+  status           InviteStatus @default(pending)
+  expiresAt        DateTime
+  acceptedByUserId String?
+  acceptedAt       DateTime?
+  createdAt        DateTime     @default(now())
+  pair             Pair         @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  createdByUser    User         @relation("InviteCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  acceptedByUser   User?        @relation("InviteAcceptedBy", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([pairId])
+  @@index([createdByUserId])
+  @@index([acceptedByUserId])
+  @@index([status, expiresAt])
+  @@map("invites")
+}
+
+model Period {
+  id             String       @id @default(cuid())
+  pairId         String
+  label          String?
+  status         PeriodStatus @default(open)
+  openedByUserId String
+  openedAt       DateTime     @default(now())
+  closedAt       DateTime?
+  reopenedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  pair           Pair         @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  openedByUser   User         @relation("PeriodOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  participants   PeriodParticipant[]
+  expenses       Expense[]
+  settlement     SettlementResult?
+
+  @@index([pairId])
+  @@index([openedByUserId])
+  @@index([pairId, status])
+  @@map("periods")
+}
+
+model PeriodParticipant {
+  id        String                  @id @default(cuid())
+  periodId  String
+  userId    String
+  status    PeriodParticipantStatus @default(open)
+  closedAt  DateTime?
+  createdAt DateTime                @default(now())
+  period    Period                  @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([periodId, userId])
+  @@index([periodId])
+  @@index([userId])
+  @@index([periodId, status])
+  @@map("period_participants")
+}
+
+model Expense {
+  id           String   @id @default(cuid())
+  periodId     String
+  paidByUserId String
+  description  String
+  amountCents  Int
+  occurredOn   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  paidByUser   User     @relation("ExpensePaidBy", fields: [paidByUserId], references: [id], onDelete: Restrict)
+
+  @@index([periodId])
+  @@index([paidByUserId])
+  @@index([periodId, occurredOn])
+  @@map("expenses")
+}
+
+model SettlementResult {
+  id                 String   @id @default(cuid())
+  periodId           String   @unique
+  totalAmountCents   Int
+  sharePerPersonCents Int
+  payerUserId        String
+  receiverUserId     String
+  transferAmountCents Int
+  calculatedAt       DateTime @default(now())
+  period             Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  payerUser          User     @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
+  receiverUser       User     @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Restrict)
+
+  @@index([payerUserId])
+  @@index([receiverUserId])
+  @@map("settlement_results")
+}
+
+// Regras que o Prisma não garante sozinho e devem ser tratadas na aplicação
+// ou em migrações SQL complementares:
+// - cada dupla pode ter no máximo 2 membros ativos
+// - cada dupla pode ter no máximo 1 período com status open/partially_closed
+// - só permitir despesa para participante ainda aberto no período

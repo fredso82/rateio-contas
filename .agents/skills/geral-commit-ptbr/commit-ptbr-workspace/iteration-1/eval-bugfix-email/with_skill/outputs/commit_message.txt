@@ -1,0 +1,7 @@
+Corrigiu envio de e-mail duplicado
+
+Corrigiu bug que causava envio de notificação
+duplicada para o cliente no fluxo de e-mail.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+

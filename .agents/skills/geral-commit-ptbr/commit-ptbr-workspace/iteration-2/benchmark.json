@@ -1,0 +1,90 @@
+{
+  "skill_name": "commit-ptbr",
+  "iteration": 2,
+  "configurations": [
+    {
+      "name": "with_skill_v2",
+      "label": "Com Skill v2 (participio, sem acentos, sem co-author)",
+      "evals": [
+        {
+          "eval_name": "bugfix-email",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_max_72_chars_por_linha", "passed": true},
+            {"text": "sem_co_authored_by", "passed": true},
+            {"text": "sem_caracteres_especiais", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "refatoracao-auth",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_menciona_mudancas", "passed": true},
+            {"text": "sem_co_authored_by", "passed": true},
+            {"text": "sem_caracteres_especiais", "passed": true}
+          ]
+        },
+        {
+          "eval_name": "prompt-vago",
+          "pass_rate": 1.0,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": true},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "sem_co_authored_by", "passed": true},
+            {"text": "sem_caracteres_especiais", "passed": true}
+          ]
+        }
+      ],
+      "overall_pass_rate": 1.0
+    },
+    {
+      "name": "with_skill_v1",
+      "label": "Com Skill v1 (passado, com acentos, com co-author)",
+      "evals": [
+        {
+          "eval_name": "bugfix-email",
+          "pass_rate": 0.6,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_max_72_chars_por_linha", "passed": true},
+            {"text": "sem_co_authored_by", "passed": false},
+            {"text": "sem_caracteres_especiais", "passed": false}
+          ]
+        },
+        {
+          "eval_name": "refatoracao-auth",
+          "pass_rate": 0.6,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "corpo_menciona_mudancas", "passed": true},
+            {"text": "sem_co_authored_by", "passed": false},
+            {"text": "sem_caracteres_especiais", "passed": false}
+          ]
+        },
+        {
+          "eval_name": "prompt-vago",
+          "pass_rate": 0.5,
+          "assertions": [
+            {"text": "titulo_em_portugues_participio", "passed": false},
+            {"text": "titulo_max_50_chars", "passed": true},
+            {"text": "sem_co_authored_by", "passed": false},
+            {"text": "sem_caracteres_especiais", "passed": false}
+          ]
+        }
+      ],
+      "overall_pass_rate": 0.57
+    }
+  ],
+  "summary": {
+    "with_skill_v2_pass_rate": "100%",
+    "with_skill_v1_pass_rate": "57%",
+    "delta": "+43%",
+    "key_finding": "Skill v2 atende todos os criterios: participio, sem acentos no corpo, sem Co-Authored-By. Melhoria significativa sobre v1."
+  }
+}
