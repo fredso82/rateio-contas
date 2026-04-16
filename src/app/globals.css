@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4ebdd;
+  --foreground: #1f1a16;
+  --surface: #fff9f1;
+  --surface-strong: #f2e2cb;
+  --card: rgba(255, 250, 242, 0.78);
+  --card-strong: #fffdf8;
+  --line: rgba(53, 37, 22, 0.12);
+  --line-strong: rgba(53, 37, 22, 0.2);
+  --brand: #1c6a62;
+  --brand-strong: #114b46;
+  --accent: #cc7a26;
+  --accent-soft: #f6e1c6;
+  --success: #16775d;
+  --danger: #b43551;
+  --muted: #6f655c;
+  --shadow: 0 24px 60px rgba(52, 38, 24, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-card: var(--card);
+  --color-card-strong: var(--card-strong);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(28, 106, 98, 0.2),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(204, 122, 38, 0.18),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #f8f0e2 0%, #f1e4d0 54%, #ebddc7 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(53, 37, 22, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 37, 22, 0.05) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at center, black 12%, transparent 90%);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 24%, white);
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  input::placeholder {
+    color: color-mix(in srgb, var(--muted) 78%, white);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), serif;
+  }
+
+  .glass-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 252, 247, 0.92) 0%,
+      rgba(255, 248, 240, 0.76) 100%
+    );
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+  }
+
+  .section-frame {
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 88%, white);
+    box-shadow: var(--shadow);
+  }
+
+  .eyebrow {
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .balanced-text {
+    text-wrap: balance;
+  }
+}

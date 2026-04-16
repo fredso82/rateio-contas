@@ -50,6 +50,8 @@ Este plano transforma a especificação atual do `rateio-contas` em uma sequênc
 
 ## Etapa 1. Fundação do projeto
 
+Status: concluída
+
 ### Objetivo
 
 Criar a base técnica do app para permitir evolução segura e rápida.
@@ -67,12 +69,12 @@ Criar a base técnica do app para permitir evolução segura e rápida.
 
 ### Checklist técnico sugerido
 
-- [ ] Fechar estrutura base do app, incluindo organização de rotas, aliases e separação entre UI, domínio e acesso a dados.
-- [ ] Subir `PostgreSQL` local, conectar `Prisma`, aplicar migração inicial e gerar client.
-- [ ] Criar `envs` mínimas para local e produção, incluindo autenticação, banco e URL base da aplicação.
-- [ ] Preparar scripts de `dev`, `lint`, `typecheck`, `build`, `db:migrate` e `db:seed`.
-- [ ] Definir padrão inicial para logs, captura de erros e respostas de falha em ações de servidor.
-- [ ] Validar que a aplicação sobe, conecta no banco e gera build de produção sem erro.
+- [x] Fechar estrutura base do app, incluindo organização de rotas, aliases e separação entre UI, domínio e acesso a dados.
+- [x] Subir `PostgreSQL` local, conectar `Prisma`, aplicar migração inicial e gerar client.
+- [x] Criar `envs` mínimas para local e produção, incluindo autenticação, banco e URL base da aplicação.
+- [x] Preparar scripts de `dev`, `lint`, `typecheck`, `build`, `db:migrate` e `db:seed`.
+- [x] Definir padrão inicial para logs, captura de erros e respostas de falha em ações de servidor.
+- [x] Validar que a aplicação sobe, conecta no banco e gera build de produção sem erro.
 
 ### Entregáveis
 
@@ -96,6 +98,8 @@ Criar a base técnica do app para permitir evolução segura e rápida.
 
 ## Etapa 2. Base visual e shell da aplicação
 
+Status: concluída
+
 ### Objetivo
 
 Montar a casca da aplicação com identidade visual inicial e navegação coerente com o produto.
@@ -110,11 +114,11 @@ Montar a casca da aplicação com identidade visual inicial e navegação coeren
 
 ### Checklist técnico sugerido
 
-- [ ] Definir identidade visual inicial com tokens de cor, tipografia, espaçamento e radius.
-- [ ] Criar layout raiz da aplicação, separando claramente áreas públicas, autenticadas e páginas de fluxo especial como convite.
-- [ ] Implementar componentes base com variantes suficientes para reutilização sem retrabalho imediato.
-- [ ] Padronizar estados de loading, erro, sucesso e confirmação com comportamento consistente.
-- [ ] Montar ao menos uma tela autenticada e uma tela pública usando apenas a base criada, para testar a robustez do shell.
+- [x] Definir identidade visual inicial com tokens de cor, tipografia, espaçamento e radius.
+- [x] Criar layout raiz da aplicação, separando claramente áreas públicas, autenticadas e páginas de fluxo especial como convite.
+- [x] Implementar componentes base com variantes suficientes para reutilização sem retrabalho imediato.
+- [x] Padronizar estados de loading, erro, sucesso e confirmação com comportamento consistente.
+- [x] Montar ao menos uma tela autenticada e uma tela pública usando apenas a base criada, para testar a robustez do shell.
 
 ### Entregáveis
 
@@ -133,6 +137,8 @@ Montar a casca da aplicação com identidade visual inicial e navegação coeren
 
 ## Etapa 3. Autenticação e sessão
 
+Status: concluída
+
 ### Objetivo
 
 Permitir entrada segura no sistema com os dois métodos previstos no MVP.
@@ -149,12 +155,12 @@ Permitir entrada segura no sistema com os dois métodos previstos no MVP.
 
 ### Checklist técnico sugerido
 
-- [ ] Fechar solução de autenticação, sessão e estratégia de persistência para web e PWA.
-- [ ] Implementar cadastro e login com `email/senha`, incluindo hash seguro e validação de formulário.
-- [ ] Implementar login com `Google` e mapear corretamente contas para o mesmo usuário quando necessário.
-- [ ] Proteger rotas privadas e padronizar redirecionamentos após login, logout e tentativa de acesso sem sessão.
-- [ ] Garantir retorno correto ao fluxo de convite após autenticação.
-- [ ] Executar smoke test com conta nova, conta existente, logout e retorno com sessão persistida.
+- [x] Fechar solução de autenticação, sessão e estratégia de persistência para web e PWA.
+- [x] Implementar cadastro e login com `email/senha`, incluindo hash seguro e validação de formulário.
+- [x] Implementar login com `Google` e mapear corretamente contas para o mesmo usuário quando necessário.
+- [x] Proteger rotas privadas e padronizar redirecionamentos após login, logout e tentativa de acesso sem sessão.
+- [x] Garantir retorno correto ao fluxo de convite após autenticação.
+- [x] Executar smoke test com conta nova, conta existente, logout e retorno com sessão persistida.
 
 ### Entregáveis
 
