@@ -30,10 +30,12 @@ describe("profile repository integration", () => {
         id: user.id,
         name: "Conta Teste",
         email: "profile@example.com",
+        emailVerifiedAt: null,
         pixKey: null,
         profileCompletedAt: null,
       },
       isProfileComplete: false,
+      hasGoogleLinked: false,
     });
   });
 

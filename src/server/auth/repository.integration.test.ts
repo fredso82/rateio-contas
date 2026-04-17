@@ -67,17 +67,23 @@ describe("auth repository integration", () => {
     ).resolves.toBeNull();
   });
 
-  it("links a Google account to an existing user with the same email", async () => {
+  it("blocks implicit Google linking when a user with the same email already exists", async () => {
     const existingUser = await registerCredentialsUser({
       name: "Conta Existente",
       email: "casal@example.com",
       password: "12345678",
     });
 
-    const syncedUser = await syncGoogleUser({
-      providerAccountId: "google-account-123",
-      email: "  CASAL@example.com ",
-      name: "Outro Nome",
+    await expect(
+      syncGoogleUser({
+        providerAccountId: "google-account-123",
+        email: "  CASAL@example.com ",
+        name: "Outro Nome",
+        emailVerified: true,
+      }),
+    ).rejects.toMatchObject({
+      code: "ACCOUNT_LINK_REQUIRED",
+      statusCode: 409,
     });
 
     const googleAccount = await prisma.authAccount.findUnique({
@@ -89,12 +95,46 @@ describe("auth repository integration", () => {
       },
     });
 
+    expect(existingUser.email).toBe("casal@example.com");
+    expect(googleAccount).toBeNull();
+  });
+
+  it("links Google explicitly for the authenticated user", async () => {
+    const existingUser = await registerCredentialsUser({
+      name: "Conta Existente",
+      email: "casal@example.com",
+      password: "12345678",
+    });
+
+    const syncedUser = await syncGoogleUser({
+      providerAccountId: "google-account-123",
+      email: "  CASAL@example.com ",
+      name: "Outro Nome",
+      emailVerified: true,
+      linkUserId: existingUser.id,
+    });
+
+    const googleAccount = await prisma.authAccount.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: AuthProvider.google,
+          providerAccountId: "google-account-123",
+        },
+      },
+    });
+    const refreshedUser = await prisma.user.findUnique({
+      where: {
+        id: existingUser.id,
+      },
+    });
+
     expect(syncedUser).toEqual({
       id: existingUser.id,
       name: "Conta Existente",
       email: "casal@example.com",
     });
     expect(googleAccount?.userId).toBe(existingUser.id);
+    expect(refreshedUser?.emailVerifiedAt).toBeTruthy();
   });
 
   it("creates a new user from Google when the email does not exist yet", async () => {
@@ -102,6 +142,7 @@ describe("auth repository integration", () => {
       providerAccountId: "google-account-456",
       email: "joao.silva@example.com",
       name: " ",
+      emailVerified: true,
     });
 
     const createdUser = await prisma.user.findUnique({
@@ -119,6 +160,7 @@ describe("auth repository integration", () => {
     });
     expect(createdUser?.authAccounts).toHaveLength(1);
     expect(createdUser?.authAccounts[0]?.provider).toBe(AuthProvider.google);
+    expect(createdUser?.emailVerifiedAt).toBeTruthy();
   });
 
   it("returns the dashboard snapshot with only active pairs counted", async () => {
@@ -166,6 +208,7 @@ describe("auth repository integration", () => {
         id: user.id,
         name: "Conta Snapshot",
         email: "snapshot@example.com",
+        emailVerifiedAt: null,
         pixKey: null,
       },
       activePairsCount: 1,

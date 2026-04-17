@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { AuthProvider } from "@prisma/client";
+import { AuthProvider, Prisma } from "@prisma/client";
 
 import { AppError } from "@/lib/errors";
 import { getDisplayName, normalizeEmail } from "@/lib/utils";
@@ -84,27 +84,9 @@ export async function syncGoogleUser(input: {
   providerAccountId: string;
   email: string | null | undefined;
   name: string | null | undefined;
+  emailVerified: boolean;
+  linkUserId?: string | null;
 }) {
-  const providerAccount = await prisma.authAccount.findUnique({
-    where: {
-      provider_providerAccountId: {
-        provider: AuthProvider.google,
-        providerAccountId: input.providerAccountId,
-      },
-    },
-    include: {
-      user: true,
-    },
-  });
-
-  if (providerAccount) {
-    return {
-      id: providerAccount.user.id,
-      name: providerAccount.user.name,
-      email: providerAccount.user.email,
-    } satisfies AuthUser;
-  }
-
   if (!input.email) {
     throw new AppError(
       "Não foi possível concluir a autenticação com Google sem um email.",
@@ -113,46 +95,146 @@ export async function syncGoogleUser(input: {
     );
   }
 
-  const normalizedEmail = normalizeEmail(input.email);
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email: normalizedEmail,
-    },
-  });
+  if (!input.emailVerified) {
+    throw new AppError(
+      "A conta Google precisa ter email verificado para ser usada aqui.",
+      "GOOGLE_EMAIL_NOT_VERIFIED",
+      400,
+    );
+  }
 
-  if (existingUser) {
-    await prisma.authAccount.create({
-      data: {
-        userId: existingUser.id,
-        provider: AuthProvider.google,
+  const normalizedEmail = normalizeEmail(input.email);
+
+  return prisma.$transaction(async (tx) => {
+    const providerAccount = await tx.authAccount.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: AuthProvider.google,
+          providerAccountId: input.providerAccountId,
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (providerAccount) {
+      if (
+        input.linkUserId &&
+        providerAccount.user.id !== input.linkUserId
+      ) {
+        throw new AppError(
+          "Essa conta Google já está vinculada a outro usuário.",
+          "GOOGLE_ACCOUNT_ALREADY_LINKED",
+          409,
+        );
+      }
+
+      return {
+        id: providerAccount.user.id,
+        name: providerAccount.user.name,
+        email: providerAccount.user.email,
+      } satisfies AuthUser;
+    }
+
+    if (input.linkUserId) {
+      return linkGoogleAccountForUser(tx, input.linkUserId, {
         providerAccountId: input.providerAccountId,
+      });
+    }
+
+    const existingUser = await tx.user.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
+
+    if (existingUser) {
+      throw new AppError(
+        "Já existe uma conta com esse email. Entre com seu método atual e vincule o Google pelo perfil.",
+        "ACCOUNT_LINK_REQUIRED",
+        409,
+      );
+    }
+
+    const user = await tx.user.create({
+      data: {
+        name: getDisplayName(input.name, normalizedEmail),
+        email: normalizedEmail,
+        emailVerifiedAt: new Date(),
+        authAccounts: {
+          create: {
+            provider: AuthProvider.google,
+            providerAccountId: input.providerAccountId,
+          },
+        },
       },
     });
 
     return {
-      id: existingUser.id,
-      name: existingUser.name,
-      email: existingUser.email,
+      id: user.id,
+      name: user.name,
+      email: user.email,
     } satisfies AuthUser;
-  }
+  });
+}
 
-  const user = await prisma.user.create({
-    data: {
-      name: getDisplayName(input.name, normalizedEmail),
-      email: normalizedEmail,
+async function linkGoogleAccountForUser(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  input: {
+    providerAccountId: string;
+  },
+) {
+  const targetUser = await tx.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerifiedAt: true,
       authAccounts: {
-        create: {
+        where: {
           provider: AuthProvider.google,
-          providerAccountId: input.providerAccountId,
+        },
+        select: {
+          id: true,
         },
       },
     },
   });
 
+  if (!targetUser) {
+    throw new AppError("Usuário não encontrado.", "USER_NOT_FOUND", 404);
+  }
+
+  if (targetUser.authAccounts.length === 0) {
+    await tx.authAccount.create({
+      data: {
+        userId,
+        provider: AuthProvider.google,
+        providerAccountId: input.providerAccountId,
+      },
+    });
+  }
+
+  if (!targetUser.emailVerifiedAt) {
+    await tx.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        emailVerifiedAt: new Date(),
+      },
+    });
+  }
+
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
+    id: targetUser.id,
+    name: targetUser.name,
+    email: targetUser.email,
   } satisfies AuthUser;
 }
 
@@ -164,6 +246,7 @@ export async function getDashboardSnapshot(userId: string) {
         id: true,
         name: true,
         email: true,
+        emailVerifiedAt: true,
         pixKey: true,
       },
     }),

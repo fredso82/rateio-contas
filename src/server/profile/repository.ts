@@ -13,8 +13,14 @@ export async function getProfileSnapshot(userId: string) {
       id: true,
       name: true,
       email: true,
+      emailVerifiedAt: true,
       pixKey: true,
       profileCompletedAt: true,
+      authAccounts: {
+        select: {
+          provider: true,
+        },
+      },
     },
   });
 
@@ -23,8 +29,18 @@ export async function getProfileSnapshot(userId: string) {
   }
 
   return {
-    user,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerifiedAt: user.emailVerifiedAt,
+      pixKey: user.pixKey,
+      profileCompletedAt: user.profileCompletedAt,
+    },
     isProfileComplete: user.profileCompletedAt !== null,
+    hasGoogleLinked: user.authAccounts.some(
+      (account) => account.provider === "google",
+    ),
   };
 }
 

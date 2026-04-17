@@ -5,8 +5,8 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Link2, ShieldCheck } from "luc
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { acceptPendingInvite } from "@/server/invites/actions";
 import {
-  acceptInvite,
   type InviteLandingSnapshot,
   getInviteLandingSnapshot,
 } from "@/server/invites/repository";
@@ -21,62 +21,13 @@ export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
   const session = await auth();
   const callbackUrl = `/convite/${token}`;
-  let invite: InviteLandingSnapshot = await getInviteLandingSnapshot(
+  const invite: InviteLandingSnapshot = await getInviteLandingSnapshot(
     token,
     session?.user?.id,
   );
 
   if (invite.kind === "already_member") {
     redirect(`/app/duplas/${invite.pairId}`);
-  }
-
-  if (session?.user?.id && invite.kind === "pending") {
-    const result = await acceptInvite(token, session.user.id);
-
-    if (result.kind === "joined" || result.kind === "already_member") {
-      redirect(`/app/duplas/${result.pairId}`);
-    }
-
-    if (result.kind === "accepted") {
-      invite = {
-        kind: "accepted",
-        pairName: invite.pairName,
-      };
-    }
-
-    if (result.kind === "expired") {
-      invite = {
-        kind: "expired",
-        pairName: invite.pairName,
-      };
-    }
-
-    if (result.kind === "revoked") {
-      invite = {
-        kind: "revoked",
-        pairName: invite.pairName,
-      };
-    }
-
-    if (result.kind === "pair_full") {
-      invite = {
-        kind: "pair_full",
-        pairName: invite.pairName,
-      };
-    }
-
-    if (result.kind === "unavailable") {
-      invite = {
-        kind: "unavailable",
-        pairName: invite.pairName,
-      };
-    }
-
-    if (result.kind === "invalid") {
-      invite = {
-        kind: "invalid",
-      };
-    }
   }
 
   const stateContent: Record<
@@ -171,12 +122,13 @@ export default async function InvitePage({ params }: InvitePageProps) {
         </div>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           {invite.kind === "pending" && session ? (
-            <Button asChild size="lg">
-              <Link href="/app/duplas">
-                Ir para as duplas
+            <form action={acceptPendingInvite}>
+              <input name="token" type="hidden" value={token} />
+              <Button size="lg" type="submit">
+                Aceitar convite
                 <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+              </Button>
+            </form>
           ) : invite.kind === "pending" ? (
             <>
               <Button asChild size="lg">

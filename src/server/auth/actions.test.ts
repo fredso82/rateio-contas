@@ -4,15 +4,21 @@ import { AppError } from "@/lib/errors";
 import { initialAuthActionState } from "@/server/auth/action-state";
 
 const {
+  authMock,
   signInMock,
   signOutMock,
   registerCredentialsUserMock,
+  cookiesMock,
+  getClientIpMock,
   loggerErrorMock,
   MockAuthError,
 } = vi.hoisted(() => ({
+  authMock: vi.fn(),
   signInMock: vi.fn(),
   signOutMock: vi.fn(),
   registerCredentialsUserMock: vi.fn(),
+  cookiesMock: vi.fn(),
+  getClientIpMock: vi.fn(),
   loggerErrorMock: vi.fn(),
   MockAuthError: class extends Error {
     constructor(public type: string) {
@@ -27,12 +33,21 @@ vi.mock("next-auth", () => ({
 }));
 
 vi.mock("@/auth", () => ({
+  auth: authMock,
   signIn: signInMock,
   signOut: signOutMock,
 }));
 
+vi.mock("next/headers", () => ({
+  cookies: cookiesMock,
+}));
+
 vi.mock("@/server/auth/repository", () => ({
   registerCredentialsUser: registerCredentialsUserMock,
+}));
+
+vi.mock("@/lib/request-context", () => ({
+  getClientIp: getClientIpMock,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -46,6 +61,7 @@ vi.mock("@/lib/logger", () => ({
 
 import {
   continueWithGoogle,
+  linkGoogleAccount,
   loginWithCredentials,
   logout,
   registerWithCredentials,
@@ -64,6 +80,10 @@ function buildFormData(entries: Record<string, string>) {
 describe("auth server actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getClientIpMock.mockResolvedValue("127.0.0.1");
+    cookiesMock.mockResolvedValue({
+      set: vi.fn(),
+    });
   });
 
   it("returns field errors when login payload is invalid", async () => {
@@ -193,6 +213,27 @@ describe("auth server actions", () => {
     });
     expect(signOutMock).toHaveBeenCalledWith({
       redirectTo: "/",
+    });
+  });
+
+  it("starts the Google link flow for an authenticated user", async () => {
+    const cookieStore = {
+      set: vi.fn(),
+    };
+
+    authMock.mockResolvedValue({
+      user: {
+        id: "user_123",
+      },
+    });
+    cookiesMock.mockResolvedValue(cookieStore);
+    signInMock.mockResolvedValue(undefined);
+
+    await linkGoogleAccount();
+
+    expect(cookieStore.set).toHaveBeenCalledTimes(1);
+    expect(signInMock).toHaveBeenCalledWith("google", {
+      redirectTo: "/app/perfil?linked=google",
     });
   });
 });

@@ -7,6 +7,7 @@ import {
   type Invite,
 } from "@prisma/client";
 
+import { decryptOpaqueToken, encryptOpaqueToken, hashOpaqueToken } from "@/lib/crypto";
 import { AppError } from "@/lib/errors";
 import { prisma } from "@/server/db/client";
 import { addMemberToActivePeriod } from "@/server/periods/repository";
@@ -57,6 +58,53 @@ function isExpired(invite: Pick<Invite, "status" | "expiresAt">, now: Date) {
   return invite.status === InviteStatus.pending && invite.expiresAt <= now;
 }
 
+function buildStoredInviteToken(token: string) {
+  return {
+    tokenHash: hashOpaqueToken(token),
+    tokenCiphertext: encryptOpaqueToken(token),
+  };
+}
+
+function getInviteTokenOrThrow(invite: {
+  id: string;
+  token: string | null;
+  tokenCiphertext: string | null;
+}) {
+  if (invite.tokenCiphertext) {
+    return decryptOpaqueToken(invite.tokenCiphertext);
+  }
+
+  if (invite.token) {
+    return invite.token;
+  }
+
+  throw new AppError(
+    "Não foi possível recuperar o link de convite atual.",
+    "INVITE_TOKEN_UNAVAILABLE",
+    500,
+  );
+}
+
+async function findInviteByToken(
+  tx: Prisma.TransactionClient | typeof prisma,
+  token: string,
+) {
+  const tokenHash = hashOpaqueToken(token);
+
+  return tx.invite.findFirst({
+    where: {
+      OR: [
+        {
+          tokenHash,
+        },
+        {
+          token,
+        },
+      ],
+    },
+  });
+}
+
 async function expireStaleInvites(
   tx: Prisma.TransactionClient | typeof prisma,
   pairId: string,
@@ -82,17 +130,21 @@ async function createUniqueInvite(
   now: Date,
 ) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
+    const token = randomBytes(24).toString("hex");
+    const storedToken = buildStoredInviteToken(token);
+
     try {
-      return await tx.invite.create({
+      const invite = await tx.invite.create({
         data: {
           pairId,
           createdByUserId,
-          token: randomBytes(24).toString("hex"),
+          token: null,
+          tokenHash: storedToken.tokenHash,
+          tokenCiphertext: storedToken.tokenCiphertext,
           expiresAt: addInviteTtl(now),
         },
         select: {
           id: true,
-          token: true,
           status: true,
           expiresAt: true,
           createdAt: true,
@@ -100,6 +152,11 @@ async function createUniqueInvite(
           acceptedByUserId: true,
         },
       });
+
+      return {
+        ...invite,
+        token,
+      };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -146,6 +203,7 @@ export async function getPairInviteSnapshot(pairId: string, userId: string) {
     select: {
       id: true,
       token: true,
+      tokenCiphertext: true,
       status: true,
       expiresAt: true,
       createdAt: true,
@@ -154,7 +212,14 @@ export async function getPairInviteSnapshot(pairId: string, userId: string) {
     },
   });
 
-  return latestInvite;
+  if (!latestInvite) {
+    return null;
+  }
+
+  return {
+    ...latestInvite,
+    token: getInviteTokenOrThrow(latestInvite),
+  };
 }
 
 export async function generateInviteForPair(
@@ -223,14 +288,21 @@ export async function getInviteLandingSnapshot(
   userId?: string,
 ): Promise<InviteLandingSnapshot> {
   const now = new Date();
-  const invite = await prisma.invite.findUnique({
+  const invite = await findInviteByToken(prisma, token);
+
+  if (!invite) {
+    return {
+      kind: "invalid" as const,
+    };
+  }
+
+  const expandedInvite = await prisma.invite.findUnique({
     where: {
-      token,
+      id: invite.id,
     },
     select: {
       id: true,
       pairId: true,
-      token: true,
       status: true,
       expiresAt: true,
       createdAt: true,
@@ -256,30 +328,33 @@ export async function getInviteLandingSnapshot(
     },
   });
 
-  if (!invite) {
+  if (!expandedInvite) {
     return {
       kind: "invalid" as const,
     };
   }
 
-  if (userId && invite.pair.members.some((member) => member.userId === userId)) {
+  if (
+    userId &&
+    expandedInvite.pair.members.some((member) => member.userId === userId)
+  ) {
     return {
       kind: "already_member" as const,
-      pairId: invite.pair.id,
+      pairId: expandedInvite.pair.id,
     };
   }
 
-  if (invite.pair.status !== PairStatus.active) {
+  if (expandedInvite.pair.status !== PairStatus.active) {
     return {
       kind: "unavailable" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
-  if (isExpired(invite, now)) {
+  if (isExpired(expandedInvite, now)) {
     await prisma.invite.update({
       where: {
-        id: invite.id,
+        id: expandedInvite.id,
       },
       data: {
         status: InviteStatus.expired,
@@ -288,44 +363,44 @@ export async function getInviteLandingSnapshot(
 
     return {
       kind: "expired" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
-  if (invite.status === InviteStatus.revoked) {
+  if (expandedInvite.status === InviteStatus.revoked) {
     return {
       kind: "revoked" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
-  if (invite.status === InviteStatus.accepted) {
+  if (expandedInvite.status === InviteStatus.accepted) {
     return {
       kind: "accepted" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
-  if (invite.status === InviteStatus.expired) {
+  if (expandedInvite.status === InviteStatus.expired) {
     return {
       kind: "expired" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
-  if (invite.pair.members.length >= 2) {
+  if (expandedInvite.pair.members.length >= 2) {
     return {
       kind: "pair_full" as const,
-      pairName: invite.pair.name,
+      pairName: expandedInvite.pair.name,
     };
   }
 
   return {
     kind: "pending" as const,
-    pairId: invite.pair.id,
-    pairName: invite.pair.name,
-    createdByName: invite.createdByUser.name,
-    expiresAt: invite.expiresAt,
+    pairId: expandedInvite.pair.id,
+    pairName: expandedInvite.pair.name,
+    createdByName: expandedInvite.createdByUser.name,
+    expiresAt: expandedInvite.expiresAt,
   };
 }
 
@@ -336,9 +411,17 @@ export async function acceptInvite(
 ): Promise<AcceptInviteResult> {
   return prisma.$transaction(
     async (tx) => {
-      const invite = await tx.invite.findUnique({
+      const invite = await findInviteByToken(tx, token);
+
+      if (!invite) {
+        return {
+          kind: "invalid" as const,
+        };
+      }
+
+      const expandedInvite = await tx.invite.findUnique({
         where: {
-          token,
+          id: invite.id,
         },
         select: {
           id: true,
@@ -359,29 +442,29 @@ export async function acceptInvite(
         },
       });
 
-      if (!invite) {
+      if (!expandedInvite) {
         return {
           kind: "invalid" as const,
         };
       }
 
-      if (invite.pair.members.some((member) => member.userId === userId)) {
+      if (expandedInvite.pair.members.some((member) => member.userId === userId)) {
         return {
           kind: "already_member" as const,
-          pairId: invite.pairId,
+          pairId: expandedInvite.pairId,
         };
       }
 
-      if (invite.pair.status !== PairStatus.active) {
+      if (expandedInvite.pair.status !== PairStatus.active) {
         return {
           kind: "unavailable" as const,
         };
       }
 
-      if (isExpired(invite, now)) {
+      if (isExpired(expandedInvite, now)) {
         await tx.invite.update({
           where: {
-            id: invite.id,
+            id: expandedInvite.id,
           },
           data: {
             status: InviteStatus.expired,
@@ -393,14 +476,14 @@ export async function acceptInvite(
         };
       }
 
-      if (invite.status !== InviteStatus.pending) {
-        if (invite.status === InviteStatus.accepted) {
+      if (expandedInvite.status !== InviteStatus.pending) {
+        if (expandedInvite.status === InviteStatus.accepted) {
           return {
             kind: "accepted" as const,
           };
         }
 
-        if (invite.status === InviteStatus.expired) {
+        if (expandedInvite.status === InviteStatus.expired) {
           return {
             kind: "expired" as const,
           };
@@ -411,11 +494,11 @@ export async function acceptInvite(
         };
       }
 
-      await tx.$queryRaw`SELECT id FROM "pairs" WHERE id = ${invite.pairId} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM "pairs" WHERE id = ${expandedInvite.pairId} FOR UPDATE`;
 
       const currentMembers = await tx.pairMember.findMany({
         where: {
-          pairId: invite.pairId,
+          pairId: expandedInvite.pairId,
         },
         select: {
           userId: true,
@@ -425,14 +508,14 @@ export async function acceptInvite(
       if (currentMembers.some((member) => member.userId === userId)) {
         return {
           kind: "already_member" as const,
-          pairId: invite.pairId,
+          pairId: expandedInvite.pairId,
         };
       }
 
       if (currentMembers.length >= 2) {
         await tx.invite.updateMany({
           where: {
-            pairId: invite.pairId,
+            pairId: expandedInvite.pairId,
             status: InviteStatus.pending,
           },
           data: {
@@ -447,16 +530,16 @@ export async function acceptInvite(
 
       await tx.pairMember.create({
         data: {
-          pairId: invite.pairId,
+          pairId: expandedInvite.pairId,
           userId,
         },
       });
 
-      await addMemberToActivePeriod(tx, invite.pairId, userId);
+      await addMemberToActivePeriod(tx, expandedInvite.pairId, userId);
 
       await tx.invite.update({
         where: {
-          id: invite.id,
+          id: expandedInvite.id,
         },
         data: {
           status: InviteStatus.accepted,
@@ -467,10 +550,10 @@ export async function acceptInvite(
 
       await tx.invite.updateMany({
         where: {
-          pairId: invite.pairId,
+          pairId: expandedInvite.pairId,
           status: InviteStatus.pending,
           id: {
-            not: invite.id,
+            not: expandedInvite.id,
           },
         },
         data: {
@@ -480,7 +563,7 @@ export async function acceptInvite(
 
       return {
         kind: "joined" as const,
-        pairId: invite.pairId,
+        pairId: expandedInvite.pairId,
       };
     },
     {

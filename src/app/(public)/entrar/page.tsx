@@ -8,13 +8,22 @@ import { sanitizeRedirect } from "@/lib/navigation";
 type SignInPageProps = {
   searchParams: Promise<{
     callbackUrl?: string;
+    error?: string;
   }>;
+};
+
+const signInErrorMessages: Record<string, string> = {
+  ACCOUNT_LINK_REQUIRED:
+    "Já existe uma conta com esse email. Entre com seu método atual e vincule o Google pelo perfil.",
+  GOOGLE_EMAIL_NOT_VERIFIED:
+    "Use uma conta Google com email verificado para entrar.",
 };
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const session = await auth();
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, error } = await searchParams;
   const safeCallbackUrl = sanitizeRedirect(callbackUrl);
+  const errorMessage = error ? signInErrorMessages[error] ?? null : null;
 
   if (session) {
     redirect(safeCallbackUrl);
@@ -42,7 +51,10 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           As mensagens de erro já seguem o padrão base do produto.
         </p>
         <div className="mt-8">
-          <SignInForm callbackUrl={safeCallbackUrl} />
+          <SignInForm
+            callbackUrl={safeCallbackUrl}
+            errorMessage={errorMessage}
+          />
         </div>
       </Card>
     </div>

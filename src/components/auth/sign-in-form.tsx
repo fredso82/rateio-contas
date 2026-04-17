@@ -14,9 +14,10 @@ import { loginWithCredentials } from "@/server/auth/actions";
 
 type SignInFormProps = {
   callbackUrl: string;
+  errorMessage?: string | null;
 };
 
-export function SignInForm({ callbackUrl }: SignInFormProps) {
+export function SignInForm({ callbackUrl, errorMessage }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(
     loginWithCredentials,
     initialAuthActionState,
@@ -30,6 +31,11 @@ export function SignInForm({ callbackUrl }: SignInFormProps) {
 
   return (
     <div className="space-y-5">
+      {errorMessage ? (
+        <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-foreground">
+          {errorMessage}
+        </div>
+      ) : null}
       <form action={formAction} className="space-y-4">
         <input name="callbackUrl" type="hidden" value={callbackUrl} />
         <div>

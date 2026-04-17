@@ -92,7 +92,7 @@ describe("period repository integration", () => {
       },
     });
 
-    await expect(acceptInvite(invite.token, guest.id)).resolves.toEqual({
+    await expect(acceptInvite(invite.token!, guest.id)).resolves.toEqual({
       kind: "joined",
       pairId: pair.id,
     });

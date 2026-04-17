@@ -101,3 +101,24 @@
 - A etapa 14 refinou a navegação mobile, criou estados mais claros para dupla arquivada/histórico/reabertura e adicionou transição leve de entrada sem comprometer acessibilidade.
 - A etapa 15 agora inclui seed mais realista para QA manual, checklist de deploy/backup no `README` e cobertura automatizada para reabertura, histórico e arquivamento.
 - As validações executadas nesta entrega foram: `npm test`, `npm run lint`, `npm run typecheck` e `npm run build`.
+
+## Tarefas atuais
+
+- [x] Remover vínculo automático entre `credentials` e `Google` por coincidência de email
+- [x] Implementar vínculo explícito do `Google` a partir do perfil autenticado
+- [x] Trocar aceite automático de convite por ação explícita via `POST`
+- [x] Adicionar rate limiting básico para autenticação, início de OAuth e aceite de convite
+- [x] Sanitizar mensagens inesperadas para o usuário e reduzir vazamento em logs
+- [x] Proteger tokens de convite em repouso com hash para lookup e cifra para recuperação controlada
+- [x] Adicionar headers HTTP de hardening
+- [x] Cobrir as correções de segurança com testes automatizados
+
+## Revisão atual
+
+- O login com `Google` deixou de vincular contas existentes apenas por email; quando já existe usuário local, o app exige autenticação pelo método atual e vínculo explícito pelo perfil.
+- A tela de perfil agora permite vincular `Google` com cookie de intenção assinado e retorno controlado para `/app/perfil`.
+- O fluxo de convite não executa mais mutação em `GET`: a rota pública apenas valida/exibe o estado e o aceite passa por `server action` dedicada.
+- Convites novos agora são persistidos com `tokenHash` para lookup e `tokenCiphertext` para recuperação controlada do link atual, mantendo compatibilidade com convites legados.
+- A camada de erro passou a expor mensagens genéricas para falhas inesperadas e os logs passaram a serializar erros sem despejar objetos crus.
+- O app agora aplica `CSP`, `HSTS`, `Referrer-Policy`, `X-Frame-Options`, `X-Content-Type-Options` e `Permissions-Policy` via `next.config.ts`.
+- As validações executadas nesta entrega foram: `npm run db:generate`, `npm run typecheck`, `npm test`, `npm run lint` e `npm run build`.

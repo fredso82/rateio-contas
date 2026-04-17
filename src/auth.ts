@@ -1,9 +1,15 @@
+import { cookies } from "next/headers";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import { APP_DEFAULT_PATH, sanitizeRedirect } from "@/lib/navigation";
+import { AppError, serializeErrorForLog } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import {
+  OAUTH_LINK_COOKIE_NAME,
+  readOAuthLinkIntent,
+} from "@/lib/oauth-link";
 import { signInSchema } from "@/lib/validation/auth";
 import { syncGoogleUser, verifyCredentials } from "@/server/auth/repository";
 
@@ -21,7 +27,7 @@ function normalizeCallbackUrl(url: string, baseUrl: string) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: process.env.AUTH_TRUST_HOST !== "false",
+  trustHost: process.env.AUTH_TRUST_HOST === "true",
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: "/entrar",
@@ -55,16 +61,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider !== "google") {
         return true;
       }
+
+      const cookieStore = await cookies();
+      const linkIntent = readOAuthLinkIntent(
+        cookieStore.get(OAUTH_LINK_COOKIE_NAME)?.value,
+      );
 
       try {
         const syncedUser = await syncGoogleUser({
           providerAccountId: account.providerAccountId,
           email: user.email,
           name: user.name,
+          emailVerified:
+            typeof profile === "object" &&
+            profile !== null &&
+            "email_verified" in profile
+              ? profile.email_verified === true
+              : false,
+          linkUserId: linkIntent?.userId,
         });
 
         user.id = syncedUser.id;
@@ -73,8 +91,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return true;
       } catch (error) {
-        logger.error("Falha ao sincronizar login Google.", error);
+        logger.error(
+          "Falha ao sincronizar login Google.",
+          serializeErrorForLog(error),
+        );
+
+        if (linkIntent) {
+          const errorCode =
+            error instanceof AppError ? error.code : "GOOGLE_LINK_FAILED";
+
+          return `/app/perfil?linkError=${encodeURIComponent(errorCode)}`;
+        }
+
+        if (error instanceof AppError) {
+          return `/entrar?error=${encodeURIComponent(error.code)}`;
+        }
+
         return false;
+      } finally {
+        if (linkIntent) {
+          cookieStore.delete(OAUTH_LINK_COOKIE_NAME);
+        }
       }
     },
     async jwt({ token, user }) {
@@ -97,13 +134,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   logger: {
     error(error) {
-      logger.error("Auth.js retornou um erro.", error);
+      logger.error("Auth.js retornou um erro.", serializeErrorForLog(error));
     },
     warn(code) {
       logger.warn("Auth.js retornou um warning.", code);
     },
     debug(code, metadata) {
-      logger.debug("Auth.js debug.", { code, metadata });
+      if (process.env.NODE_ENV !== "production") {
+        logger.debug("Auth.js debug.", { code, metadata });
+      }
     },
   },
 });

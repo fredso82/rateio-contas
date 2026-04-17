@@ -59,12 +59,16 @@ describe("invite repository integration", () => {
     });
 
     expect(secondInvite.status).toBe(InviteStatus.pending);
+    expect(secondInvite.token).toHaveLength(48);
     expect(secondInvite.expiresAt.toISOString()).toBe(
       new Date(
         secondNow.getTime() + INVITE_TTL_IN_HOURS * 60 * 60 * 1000,
       ).toISOString(),
     );
     expect(refreshedFirstInvite?.status).toBe(InviteStatus.revoked);
+    expect(refreshedFirstInvite?.token).toBeNull();
+    expect(refreshedFirstInvite?.tokenHash).toBeTruthy();
+    expect(refreshedFirstInvite?.tokenCiphertext).toBeTruthy();
   });
 
   it("returns an expired landing snapshot and persists the expired status", async () => {
@@ -96,7 +100,7 @@ describe("invite repository integration", () => {
       },
     });
 
-    const snapshot = await getInviteLandingSnapshot(invite.token);
+    const snapshot = await getInviteLandingSnapshot(invite.token!);
     const refreshedInvite = await prisma.invite.findUnique({
       where: {
         id: invite.id,
@@ -138,14 +142,11 @@ describe("invite repository integration", () => {
       },
     });
 
-    const invite = await prisma.invite.create({
-      data: {
-        pairId: pair.id,
-        createdByUserId: owner.id,
-        token: "valid-token",
-        expiresAt: new Date("2026-04-17T12:00:00.000Z"),
-      },
-    });
+    const invite = await generateInviteForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-16T12:00:00.000Z"),
+    );
 
     const siblingInvite = await prisma.invite.create({
       data: {
@@ -204,14 +205,11 @@ describe("invite repository integration", () => {
       },
     });
 
-    const invite = await prisma.invite.create({
-      data: {
-        pairId: pair.id,
-        createdByUserId: owner.id,
-        token: "snapshot-token",
-        expiresAt: new Date("2026-04-17T12:00:00.000Z"),
-      },
-    });
+    const invite = await generateInviteForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-16T12:00:00.000Z"),
+    );
 
     await expect(getPairInviteSnapshot(pair.id, owner.id)).resolves.toMatchObject(
       {

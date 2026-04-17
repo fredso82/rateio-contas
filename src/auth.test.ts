@@ -5,6 +5,7 @@ const credentialsProviderMock = vi.fn();
 const googleProviderMock = vi.fn();
 const verifyCredentialsMock = vi.fn();
 const syncGoogleUserMock = vi.fn();
+const cookiesMock = vi.fn();
 const loggerMock = {
   error: vi.fn(),
   warn: vi.fn(),
@@ -28,6 +29,10 @@ vi.mock("@/server/auth/repository", () => ({
   verifyCredentials: verifyCredentialsMock,
 }));
 
+vi.mock("next/headers", () => ({
+  cookies: cookiesMock,
+}));
+
 vi.mock("@/lib/logger", () => ({
   logger: loggerMock,
 }));
@@ -43,6 +48,7 @@ nextAuthMock.mockImplementation((config: unknown) => ({
 credentialsProviderMock.mockImplementation((config: unknown) => config);
 googleProviderMock.mockImplementation((config: unknown) => config);
 
+const { AppError } = await import("@/lib/errors");
 const authModule = await import("@/auth");
 
 const authConfig = nextAuthMock.mock.calls[0]?.[0] as {
@@ -51,7 +57,10 @@ const authConfig = nextAuthMock.mock.calls[0]?.[0] as {
     signIn: (input: {
       user: { id: string; email: string | null; name: string | null };
       account?: { provider?: string; providerAccountId: string };
-    }) => Promise<boolean>;
+      profile?: {
+        email_verified?: boolean;
+      };
+    }) => Promise<boolean | string>;
     session: (input: {
       session: {
         user: {
@@ -78,6 +87,10 @@ const credentialsProviderConfig = credentialsProviderMock.mock
 describe("auth configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    cookiesMock.mockResolvedValue({
+      get: vi.fn(() => undefined),
+      delete: vi.fn(),
+    });
   });
 
   it("uses the credentials provider authorize callback only for valid payloads", async () => {
@@ -145,6 +158,9 @@ describe("auth configuration", () => {
         provider: "google",
         providerAccountId: "google-account-123",
       },
+      profile: {
+        email_verified: true,
+      },
     });
 
     const sessionResult = await authConfig.callbacks.session({
@@ -164,6 +180,8 @@ describe("auth configuration", () => {
       providerAccountId: "google-account-123",
       email: "placeholder@example.com",
       name: "Placeholder",
+      emailVerified: true,
+      linkUserId: undefined,
     });
     expect(googleUser).toEqual({
       id: "user_google",
@@ -186,10 +204,40 @@ describe("auth configuration", () => {
         provider: "google",
         providerAccountId: "google-account-123",
       },
+      profile: {
+        email_verified: true,
+      },
     });
 
     expect(result).toBe(false);
     expect(loggerMock.error).toHaveBeenCalled();
+  });
+
+  it("redirects to the sign-in page when Google needs an explicit link", async () => {
+    syncGoogleUserMock.mockRejectedValue(
+      new AppError(
+        "Vinculo necessario.",
+        "ACCOUNT_LINK_REQUIRED",
+        409,
+      ),
+    );
+
+    const result = await authConfig.callbacks.signIn({
+      user: {
+        id: "",
+        email: "google@example.com",
+        name: "Conta Google",
+      },
+      account: {
+        provider: "google",
+        providerAccountId: "google-account-123",
+      },
+      profile: {
+        email_verified: true,
+      },
+    });
+
+    expect(result).toBe("/entrar?error=ACCOUNT_LINK_REQUIRED");
   });
 
   it("re-exports the auth helpers returned by NextAuth", () => {
