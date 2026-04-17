@@ -79,3 +79,25 @@
 - A etapa 5 agora entrega a área de duplas em `/app/duplas`, com estado vazio, criação de nova dupla, membership automático do criador e tela de detalhe destacando claramente quando a dupla ainda está incompleta.
 - A etapa 6 agora entrega geração de convites com validade de `24h`, revogação do link anterior ao regenerar, rota de convite com preservação de `callbackUrl`, aceite automático para usuário autenticado e bloqueios para convite inválido, expirado, revogado, já usado ou dupla cheia.
 - A cobertura de testes passou a incluir validações e server actions de perfil/duplas, além de integração para persistência de perfil, criação/listagem de duplas e ciclo de vida dos convites.
+
+## Tarefas atuais
+
+- [x] Implementar reabertura do período mais recente com invalidação segura do resultado anterior
+- [x] Expor reabertura na interface com confirmação explícita e cobertura de testes
+- [x] Implementar arquivamento e reativação de duplas com regras de integridade e testes
+- [x] Exibir histórico de períodos encerrados e permitir consulta de resultados anteriores
+- [x] Criar área dedicada para duplas arquivadas e ajustar navegação entre listas
+- [x] Concluir PWA com manifesto refinado, ícones e registro de service worker
+- [x] Refinar shell e telas principais com polimento visual mobile first
+- [x] Expandir seed para um cenário realista de QA manual
+- [x] Atualizar README com checklist de deploy, backup e restauração para VPS
+- [x] Validar `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` e corrigir qualquer falha
+
+## Revisão atual
+
+- A etapa 11 agora reabre apenas o período encerrado mais recente, remove o `SettlementResult` anterior, devolve os dois participantes para `open` e exige novo fechamento completo para recalcular.
+- A etapa 12 agora entrega histórico navegável direto na tela da dupla, consulta de resultados anteriores, área dedicada para duplas arquivadas e ações seguras de arquivar/reativar.
+- A etapa 13 agora tem manifesto completo, metadados de instalação, ícones próprios e registro de `service worker` para viabilizar o modo instalável.
+- A etapa 14 refinou a navegação mobile, criou estados mais claros para dupla arquivada/histórico/reabertura e adicionou transição leve de entrada sem comprometer acessibilidade.
+- A etapa 15 agora inclui seed mais realista para QA manual, checklist de deploy/backup no `README` e cobertura automatizada para reabertura, histórico e arquivamento.
+- As validações executadas nesta entrega foram: `npm test`, `npm run lint`, `npm run typecheck` e `npm run build`.

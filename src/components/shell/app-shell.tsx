@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, UserRound, UsersRound } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { AppBottomNav } from "@/components/shell/app-bottom-nav";
 
 type AppShellProps = {
   userName: string;
@@ -29,31 +30,9 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
         <LogoutButton />
       </header>
 
-      <main className="flex-1 py-6">{children}</main>
+      <main className="page-reveal flex-1 py-6">{children}</main>
 
-      <nav className="glass-card sticky bottom-4 mt-auto flex items-center justify-between rounded-[2rem] border px-4 py-3">
-        <Link
-          className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background"
-          href="/app/duplas"
-        >
-          <UsersRound className="size-4" />
-          Duplas
-        </Link>
-        <Link
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-muted transition hover:bg-white/70 hover:text-foreground"
-          href="/app/perfil"
-        >
-          <UserRound className="size-4" />
-          Perfil
-        </Link>
-        <Link
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-muted transition hover:bg-white/70 hover:text-foreground"
-          href="/"
-        >
-          Voltar ao site
-          <ArrowUpRight className="size-4" />
-        </Link>
-      </nav>
+      <AppBottomNav />
     </div>
   );
 }

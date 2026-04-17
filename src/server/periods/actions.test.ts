@@ -9,6 +9,7 @@ const {
   updateExpenseForUserMock,
   deleteExpenseForUserMock,
   closePeriodParticipationMock,
+  reopenPeriodMock,
   loggerErrorMock,
 } = vi.hoisted(() => ({
   authMock: vi.fn(),
@@ -21,6 +22,7 @@ const {
   updateExpenseForUserMock: vi.fn(),
   deleteExpenseForUserMock: vi.fn(),
   closePeriodParticipationMock: vi.fn(),
+  reopenPeriodMock: vi.fn(),
   loggerErrorMock: vi.fn(),
 }));
 
@@ -42,6 +44,7 @@ vi.mock("@/server/periods/repository", () => ({
   updateExpenseForUser: updateExpenseForUserMock,
   deleteExpenseForUser: deleteExpenseForUserMock,
   closePeriodParticipation: closePeriodParticipationMock,
+  reopenPeriod: reopenPeriodMock,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -58,6 +61,7 @@ import {
   createPeriodExpense,
   deletePeriodExpense,
   openPairPeriod,
+  reopenViewerPeriod,
   updatePeriodExpense,
 } from "@/server/periods/actions";
 import { initialExpenseActionState } from "@/server/periods/action-state";
@@ -108,9 +112,9 @@ describe("period actions", () => {
     );
 
     expect(result.status).toBe("error");
-    expect("fieldErrors" in result ? result.fieldErrors?.description : undefined).toContain(
-      "Digite uma descrição para a despesa.",
-    );
+    expect(
+      "fieldErrors" in result ? result.fieldErrors?.description : undefined,
+    ).toContain("Digite uma descrição para a despesa.");
     expect(createExpenseForPeriodMock).not.toHaveBeenCalled();
   });
 
@@ -169,5 +173,18 @@ describe("period actions", () => {
       "period_123",
       "user_123",
     );
+  });
+
+  it("reopens the latest closed period and redirects back to the workspace", async () => {
+    await expect(
+      reopenViewerPeriod(
+        buildFormData({
+          pairId: "pair_123",
+          periodId: "period_123",
+        }),
+      ),
+    ).rejects.toThrow("NEXT_REDIRECT:/app/duplas/pair_123/periodo");
+
+    expect(reopenPeriodMock).toHaveBeenCalledWith("period_123", "user_123");
   });
 });

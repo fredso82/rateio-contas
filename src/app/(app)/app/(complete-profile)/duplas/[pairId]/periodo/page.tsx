@@ -3,9 +3,11 @@ import {
   ArrowLeft,
   CalendarRange,
   CheckCircle2,
+  History,
   Lock,
   PencilLine,
   Plus,
+  RotateCcw,
   Trash2,
   WalletCards,
 } from "lucide-react";
@@ -14,10 +16,12 @@ import { auth } from "@/auth";
 import { PixKeyCopyButton } from "@/components/periods/pix-key-copy-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Modal } from "@/components/ui/modal";
 import {
   closeViewerPeriodParticipation,
   deletePeriodExpense,
   openPairPeriod,
+  reopenViewerPeriod,
 } from "@/server/periods/actions";
 import { getPairPeriodWorkspace } from "@/server/periods/repository";
 import {
@@ -29,6 +33,9 @@ import {
 type PairPeriodPageProps = {
   params: Promise<{
     pairId: string;
+  }>;
+  searchParams: Promise<{
+    periodId?: string;
   }>;
 };
 
@@ -43,17 +50,21 @@ function getPeriodStatusText(status: "open" | "partially_closed" | "closed") {
   }
 }
 
-export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
+export default async function PairPeriodPage({
+  params,
+  searchParams,
+}: PairPeriodPageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
     return null;
   }
 
-  const { pairId } = await params;
+  const [{ pairId }, { periodId }] = await Promise.all([params, searchParams]);
   const { pair, period, canOpenNewPeriod } = await getPairPeriodWorkspace(
     pairId,
     session.user.id,
+    periodId,
   );
 
   if (!period) {
@@ -72,18 +83,20 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
             Nenhum período foi aberto ainda.
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-muted">
-            Abra o primeiro período para começar a lançar despesas. Se a dupla
-            ainda estiver incompleta, tudo bem: o fechamento continua bloqueado
-            até a segunda pessoa entrar.
+            {pair.status === "archived"
+              ? "A dupla está arquivada. Reative primeiro para abrir novos períodos."
+              : "Abra o primeiro período para começar a lançar despesas. Se a dupla ainda estiver incompleta, tudo bem: o fechamento continua bloqueado até a segunda pessoa entrar."}
           </p>
 
-          <form action={openPairPeriod} className="mt-8">
-            <input name="pairId" type="hidden" value={pairId} />
-            <Button size="lg" type="submit">
-              Abrir primeiro período
-              <Plus className="size-4" />
-            </Button>
-          </form>
+          {pair.status === "active" ? (
+            <form action={openPairPeriod} className="mt-8">
+              <input name="pairId" type="hidden" value={pairId} />
+              <Button size="lg" type="submit">
+                Abrir primeiro período
+                <Plus className="size-4" />
+              </Button>
+            </form>
+          ) : null}
         </Card>
       </div>
     );
@@ -93,7 +106,7 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Button asChild variant="ghost">
           <Link href={`/app/duplas/${pairId}`}>
             <ArrowLeft className="size-4" />
@@ -101,16 +114,46 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
           </Link>
         </Button>
 
-        {canOpenNewPeriod ? (
-          <form action={openPairPeriod}>
-            <input name="pairId" type="hidden" value={pairId} />
-            <Button type="submit" variant="secondary">
-              Abrir novo período
-              <Plus className="size-4" />
+        <div className="flex flex-wrap gap-3">
+          {period.isHistoricalView ? (
+            <Button asChild variant="secondary">
+              <Link href={`/app/duplas/${pairId}/periodo`}>
+                Ver período atual
+                <ArrowLeft className="size-4 rotate-180" />
+              </Link>
             </Button>
-          </form>
-        ) : null}
+          ) : null}
+
+          {canOpenNewPeriod ? (
+            <form action={openPairPeriod}>
+              <input name="pairId" type="hidden" value={pairId} />
+              <Button type="submit" variant="secondary">
+                Abrir novo período
+                <Plus className="size-4" />
+              </Button>
+            </form>
+          ) : null}
+        </div>
       </div>
+
+      {period.isHistoricalView ? (
+        <Card className="p-5" variant="soft">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-[1rem] bg-accent-soft text-brand">
+              <History className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Visualizando um período anterior
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                Este resultado faz parte do histórico da dupla e fica disponível
+                só para consulta.
+              </p>
+            </div>
+          </div>
+        </Card>
+      ) : null}
 
       <Card className="overflow-hidden p-7 sm:p-8" variant="accent">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -126,7 +169,9 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                 ? "Período pronto para receber lançamentos dos gastos do dia a dia."
                 : period.status === "partially_closed"
                   ? "Uma pessoa já fechou a participação. A outra ainda pode ajustar as próprias despesas."
-                  : "Período encerrado com resultado persistido para consulta rápida."}
+                  : period.isHistoricalView
+                    ? "Resultado consolidado e preservado no histórico da dupla."
+                    : "Período encerrado com resultado persistido para consulta rápida ou reabertura controlada."}
             </p>
           </div>
 
@@ -139,8 +184,18 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
             </div>
             {period.closedAt ? (
               <div>
-                <p className="font-semibold text-foreground">Fechamento final</p>
+                <p className="font-semibold text-foreground">
+                  Fechamento final
+                </p>
                 <p>{formatProductDateTime(period.closedAt)}</p>
+              </div>
+            ) : null}
+            {period.reopenedAt ? (
+              <div>
+                <p className="font-semibold text-foreground">
+                  Última reabertura
+                </p>
+                <p>{formatProductDateTime(period.reopenedAt)}</p>
               </div>
             ) : null}
           </div>
@@ -187,7 +242,8 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                           {expense.description}
                         </p>
                         <p className="mt-1 text-sm text-muted">
-                          {expense.paidByName} · {formatProductDate(expense.occurredOn)}
+                          {expense.paidByName} ·{" "}
+                          {formatProductDate(expense.occurredOn)}
                         </p>
                       </div>
 
@@ -208,7 +264,11 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                             </Button>
 
                             <form action={deletePeriodExpense}>
-                              <input name="pairId" type="hidden" value={pairId} />
+                              <input
+                                name="pairId"
+                                type="hidden"
+                                value={pairId}
+                              />
                               <input
                                 name="expenseId"
                                 type="hidden"
@@ -237,7 +297,9 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                 <WalletCards className="size-5" />
               </div>
               <div>
-                <h2 className="font-display text-3xl leading-none">Resumo parcial</h2>
+                <h2 className="font-display text-3xl leading-none">
+                  Resumo parcial
+                </h2>
                 <p className="mt-1 text-sm text-muted">
                   Totais acumulados por participante neste período.
                 </p>
@@ -313,6 +375,34 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                 </Button>
               </div>
             ) : null}
+
+            {period.canReopen ? (
+              <div className="mt-4">
+                <Modal
+                  description="O resultado consolidado será removido e as duas participações voltarão para abertas."
+                  title="Reabrir este período?"
+                  trigger={
+                    <Button fullWidth type="button" variant="secondary">
+                      Reabrir período
+                      <RotateCcw className="size-4" />
+                    </Button>
+                  }
+                >
+                  <form action={reopenViewerPeriod} className="space-y-4">
+                    <input name="pairId" type="hidden" value={pairId} />
+                    <input name="periodId" type="hidden" value={period.id} />
+                    <p className="text-sm text-muted">
+                      Depois da correção, o cálculo só volta a aparecer quando
+                      as duas pessoas fecharem novamente.
+                    </p>
+                    <Button fullWidth type="submit">
+                      Confirmar reabertura
+                      <RotateCcw className="size-4" />
+                    </Button>
+                  </form>
+                </Modal>
+              </div>
+            ) : null}
           </Card>
 
           <Card className="p-6">
@@ -321,7 +411,9 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                 <CalendarRange className="size-5" />
               </div>
               <div>
-                <h2 className="font-display text-3xl leading-none">Resultado</h2>
+                <h2 className="font-display text-3xl leading-none">
+                  Resultado
+                </h2>
                 <p className="mt-1 text-sm text-muted">
                   O cálculo final aparece automaticamente quando as duas pessoas
                   fecham o período.
@@ -337,7 +429,8 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                       Ninguém deve nada.
                     </p>
                     <p className="mt-2 text-sm text-muted">
-                      O total do período ficou equilibrado entre as duas pessoas.
+                      O total do período ficou equilibrado entre as duas
+                      pessoas.
                     </p>
                   </div>
                 ) : (
@@ -345,8 +438,10 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                     <div>
                       <p className="text-lg font-semibold text-foreground">
                         {settlement.payerName} paga{" "}
-                        {formatCurrencyFromCents(settlement.transferAmountCents)} para{" "}
-                        {settlement.receiverName}.
+                        {formatCurrencyFromCents(
+                          settlement.transferAmountCents,
+                        )}{" "}
+                        para {settlement.receiverName}.
                       </p>
                       <p className="mt-2 text-sm text-muted">
                         Total do período:{" "}
@@ -359,16 +454,19 @@ export default async function PairPeriodPage({ params }: PairPeriodPageProps) {
                         <p className="text-sm font-semibold text-foreground">
                           Chave Pix de {settlement.receiverName}
                         </p>
-                        <p className="mt-2 font-mono text-sm break-all text-muted">
+                        <p className="mt-2 font-mono break-all text-sm text-muted">
                           {settlement.receiverPixKey}
                         </p>
                         <div className="mt-4">
-                          <PixKeyCopyButton pixKey={settlement.receiverPixKey} />
+                          <PixKeyCopyButton
+                            pixKey={settlement.receiverPixKey}
+                          />
                         </div>
                       </div>
                     ) : (
                       <p className="text-sm text-muted">
-                        {settlement.receiverName} ainda não cadastrou uma chave Pix.
+                        {settlement.receiverName} ainda não cadastrou uma chave
+                        Pix.
                       </p>
                     )}
                   </div>

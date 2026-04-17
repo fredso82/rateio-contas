@@ -7,7 +7,11 @@ import { auth } from "@/auth";
 import { getErrorMessage, logServerError } from "@/lib/errors";
 import { pairSchema } from "@/lib/validation/pair";
 import { type PairActionState } from "@/server/pairs/action-state";
-import { createPairForUser } from "@/server/pairs/repository";
+import {
+  archivePairForUser,
+  createPairForUser,
+  reactivatePairForUser,
+} from "@/server/pairs/repository";
 import { generateInviteForPair } from "@/server/invites/repository";
 
 function stringFromFormData(value: FormDataEntryValue | null) {
@@ -72,6 +76,46 @@ export async function generatePairInvite(formData: FormData) {
     logServerError("Falha ao gerar convite da dupla.", error);
   }
 
+  revalidatePath(`/app/duplas/${pairId}`);
+  redirect(`/app/duplas/${pairId}`);
+}
+
+export async function archiveViewerPair(formData: FormData) {
+  const userId = await requireUserId();
+  const pairId = stringFromFormData(formData.get("pairId"));
+
+  if (!pairId) {
+    redirect("/app/duplas");
+  }
+
+  try {
+    await archivePairForUser(pairId, userId);
+  } catch (error) {
+    logServerError("Falha ao arquivar dupla.", error);
+  }
+
+  revalidatePath("/app/duplas");
+  revalidatePath("/app/duplas/arquivadas");
+  revalidatePath(`/app/duplas/${pairId}`);
+  redirect(`/app/duplas/${pairId}`);
+}
+
+export async function reactivateViewerPair(formData: FormData) {
+  const userId = await requireUserId();
+  const pairId = stringFromFormData(formData.get("pairId"));
+
+  if (!pairId) {
+    redirect("/app/duplas");
+  }
+
+  try {
+    await reactivatePairForUser(pairId, userId);
+  } catch (error) {
+    logServerError("Falha ao reativar dupla.", error);
+  }
+
+  revalidatePath("/app/duplas");
+  revalidatePath("/app/duplas/arquivadas");
   revalidatePath(`/app/duplas/${pairId}`);
   redirect(`/app/duplas/${pairId}`);
 }

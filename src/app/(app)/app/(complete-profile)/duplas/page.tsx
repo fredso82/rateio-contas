@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, FolderHeart, Plus, UsersRound } from "lucide-react";
+import {
+  Archive,
+  ArrowRight,
+  FolderHeart,
+  Plus,
+  UsersRound,
+} from "lucide-react";
 
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -40,6 +46,43 @@ export default async function PairsPage() {
           </Button>
         </div>
       </Card>
+
+      <section className="grid gap-4 sm:grid-cols-2">
+        <Card className="p-5" variant="soft">
+          <p className="text-sm font-semibold text-foreground">Ativas agora</p>
+          <p className="font-display mt-3 text-4xl leading-none">
+            {activePairs.length}
+          </p>
+          <p className="mt-2 text-sm text-muted">
+            As duplas que ainda estão no fluxo principal ficam concentradas
+            aqui.
+          </p>
+        </Card>
+
+        <Card className="p-5" variant="soft">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Arquivadas
+              </p>
+              <p className="font-display mt-3 text-4xl leading-none">
+                {archivedPairs.length}
+              </p>
+              <p className="mt-2 text-sm text-muted">
+                Resultados antigos seguem acessíveis sem poluir a lista
+                principal.
+              </p>
+            </div>
+
+            <Button asChild size="sm" variant="secondary">
+              <Link href="/app/duplas/arquivadas">
+                Ver área
+                <Archive className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </Card>
+      </section>
 
       {activePairs.length === 0 ? (
         <EmptyState
@@ -85,7 +128,10 @@ export default async function PairsPage() {
                     </div>
                   </div>
 
-                  <Button asChild variant={isIncomplete ? "primary" : "secondary"}>
+                  <Button
+                    asChild
+                    variant={isIncomplete ? "primary" : "secondary"}
+                  >
                     <Link href={`/app/duplas/${pair.id}`}>
                       Ver detalhes
                       <ArrowRight className="size-4" />
@@ -99,14 +145,24 @@ export default async function PairsPage() {
       )}
 
       <Card variant="soft">
-        <p className="text-sm font-semibold text-foreground">
-          Duplas arquivadas
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          {archivedPairs.length === 0
-            ? "Nenhuma dupla arquivada até aqui."
-            : `${archivedPairs.length} dupla(s) arquivada(s) já aparecem na sua conta.`}
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Organização contínua
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              Arquive duplas fechadas para deixar a rotina do dia a dia mais
+              leve.
+            </p>
+          </div>
+
+          <Button asChild variant="ghost">
+            <Link href="/app/duplas/arquivadas">
+              Abrir arquivadas
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </Card>
     </div>
   );

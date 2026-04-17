@@ -1,14 +1,22 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
-import { PairStatus } from "@prisma/client";
+import { PairStatus, PeriodStatus } from "@prisma/client";
 
 import { AppError } from "@/lib/errors";
 import { prisma } from "@/server/db/client";
 import {
+  archivePairForUser,
   createPairForUser,
   getPairDetails,
+  listPairClosedPeriods,
   listUserPairs,
+  reactivatePairForUser,
 } from "@/server/pairs/repository";
+import {
+  closePeriodParticipation,
+  createExpenseForPeriod,
+  openPeriodForPair,
+} from "@/server/periods/repository";
 import { resetDatabase } from "@/test/helpers/database";
 
 describe("pair repository integration", () => {
@@ -127,5 +135,160 @@ describe("pair repository integration", () => {
     await expect(getPairDetails(pair.id, stranger.id)).rejects.toBeInstanceOf(
       AppError,
     );
+  });
+
+  it("archives and reactivates a pair without losing memberships", async () => {
+    const [owner, guest] = await Promise.all([
+      prisma.user.create({
+        data: {
+          name: "Titular",
+          email: "owner@example.com",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          name: "Convidado",
+          email: "guest@example.com",
+        },
+      }),
+    ]);
+
+    const pair = await prisma.pair.create({
+      data: {
+        name: "Casa",
+        createdByUserId: owner.id,
+        members: {
+          create: [{ userId: owner.id }, { userId: guest.id }],
+        },
+      },
+    });
+
+    await archivePairForUser(
+      pair.id,
+      owner.id,
+      new Date("2026-04-16T12:00:00.000Z"),
+    );
+
+    const pairAfterArchive = await prisma.pair.findUnique({
+      where: {
+        id: pair.id,
+      },
+      include: {
+        members: true,
+      },
+    });
+
+    expect(pairAfterArchive).toMatchObject({
+      id: pair.id,
+      status: PairStatus.archived,
+    });
+    expect(pairAfterArchive?.archivedAt?.toISOString()).toBe(
+      "2026-04-16T12:00:00.000Z",
+    );
+    expect(pairAfterArchive?.members).toHaveLength(2);
+
+    await reactivatePairForUser(pair.id, owner.id);
+
+    const reactivatedPair = await prisma.pair.findUnique({
+      where: {
+        id: pair.id,
+      },
+    });
+
+    expect(reactivatedPair).toMatchObject({
+      id: pair.id,
+      status: PairStatus.active,
+      archivedAt: null,
+    });
+  });
+
+  it("blocks archiving when there is an active period in progress", async () => {
+    const owner = await prisma.user.create({
+      data: {
+        name: "Titular",
+        email: "owner@example.com",
+      },
+    });
+    const pair = await prisma.pair.create({
+      data: {
+        name: "Casa",
+        createdByUserId: owner.id,
+        members: {
+          create: {
+            userId: owner.id,
+          },
+        },
+      },
+    });
+
+    await openPeriodForPair(pair.id, owner.id);
+
+    await expect(archivePairForUser(pair.id, owner.id)).rejects.toMatchObject({
+      code: "PAIR_ACTIVE_PERIOD_EXISTS",
+    });
+  });
+
+  it("lists closed periods for the pair history", async () => {
+    const [owner, guest] = await Promise.all([
+      prisma.user.create({
+        data: {
+          name: "Titular",
+          email: "owner@example.com",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          name: "Convidado",
+          email: "guest@example.com",
+        },
+      }),
+    ]);
+    const pair = await prisma.pair.create({
+      data: {
+        name: "Casa",
+        createdByUserId: owner.id,
+        members: {
+          create: [{ userId: owner.id }, { userId: guest.id }],
+        },
+      },
+    });
+    const period = await openPeriodForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-16T12:00:00.000Z"),
+    );
+
+    await createExpenseForPeriod(period.id, owner.id, {
+      description: "Mercado",
+      amountCents: 9000,
+      occurredOn: new Date("2026-04-16T12:00:00.000Z"),
+    });
+    await closePeriodParticipation(period.id, owner.id);
+    await closePeriodParticipation(period.id, guest.id);
+
+    const history = await listPairClosedPeriods(pair.id, owner.id);
+
+    expect(history.pair).toMatchObject({
+      id: pair.id,
+      status: PairStatus.active,
+    });
+    expect(history.periods).toHaveLength(1);
+    expect(history.periods[0]).toMatchObject({
+      id: period.id,
+      expenseCount: 1,
+      settlement: {
+        transferAmountCents: 4500,
+        payerName: "Convidado",
+        receiverName: "Titular",
+      },
+    });
+
+    const closedPeriod = await prisma.period.findUnique({
+      where: {
+        id: period.id,
+      },
+    });
+
+    expect(closedPeriod?.status).toBe(PeriodStatus.closed);
   });
 });

@@ -12,13 +12,13 @@ import {
 } from "@/lib/validation/expense";
 import {
   type ExpenseActionState,
-  initialExpenseActionState,
 } from "@/server/periods/action-state";
 import {
   closePeriodParticipation,
   createExpenseForPeriod,
   deleteExpenseForUser,
   openPeriodForPair,
+  reopenPeriod,
   updateExpenseForUser,
 } from "@/server/periods/repository";
 
@@ -196,4 +196,22 @@ export async function closeViewerPeriodParticipation(formData: FormData) {
   redirect(redirectToPeriod(pairId));
 }
 
-export { initialExpenseActionState };
+export async function reopenViewerPeriod(formData: FormData) {
+  const userId = await requireUserId();
+  const pairId = stringFromFormData(formData.get("pairId"));
+  const periodId = stringFromFormData(formData.get("periodId"));
+
+  if (!pairId || !periodId) {
+    redirect("/app/duplas");
+  }
+
+  try {
+    await reopenPeriod(periodId, userId);
+  } catch (error) {
+    logServerError("Falha ao reabrir período.", error);
+  }
+
+  revalidatePath(`/app/duplas/${pairId}`);
+  revalidatePath(redirectToPeriod(pairId));
+  redirect(redirectToPeriod(pairId));
+}

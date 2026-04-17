@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { PwaRegistration } from "@/components/pwa/pwa-registration";
 import { Toaster } from "@/components/ui/toaster";
 
 type ProvidersProps = {
@@ -12,6 +13,7 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <>
       {children}
+      <PwaRegistration />
       <Toaster />
     </>
   );

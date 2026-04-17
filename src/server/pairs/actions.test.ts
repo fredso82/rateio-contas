@@ -5,8 +5,10 @@ const {
   redirectMock,
   revalidatePathMock,
   createPairForUserMock,
+  archivePairForUserMock,
   generateInviteForPairMock,
   loggerErrorMock,
+  reactivatePairForUserMock,
 } = vi.hoisted(() => ({
   authMock: vi.fn(),
   redirectMock: vi.fn((destination: string) => {
@@ -14,8 +16,10 @@ const {
   }),
   revalidatePathMock: vi.fn(),
   createPairForUserMock: vi.fn(),
+  archivePairForUserMock: vi.fn(),
   generateInviteForPairMock: vi.fn(),
   loggerErrorMock: vi.fn(),
+  reactivatePairForUserMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -31,7 +35,9 @@ vi.mock("@/auth", () => ({
 }));
 
 vi.mock("@/server/pairs/repository", () => ({
+  archivePairForUser: archivePairForUserMock,
   createPairForUser: createPairForUserMock,
+  reactivatePairForUser: reactivatePairForUserMock,
 }));
 
 vi.mock("@/server/invites/repository", () => ({
@@ -48,8 +54,10 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 import {
+  archiveViewerPair,
   createPair,
   generatePairInvite,
+  reactivateViewerPair,
 } from "@/server/pairs/actions";
 import { initialPairActionState } from "@/server/pairs/action-state";
 
@@ -132,6 +140,46 @@ describe("pair actions", () => {
     ).rejects.toThrow("NEXT_REDIRECT:/app/duplas/pair_123");
 
     expect(generateInviteForPairMock).toHaveBeenCalledWith(
+      "pair_123",
+      "user_123",
+    );
+  });
+
+  it("archives a pair and revalidates both pair lists", async () => {
+    authMock.mockResolvedValue({
+      user: {
+        id: "user_123",
+      },
+    });
+
+    await expect(
+      archiveViewerPair(
+        buildFormData({
+          pairId: "pair_123",
+        }),
+      ),
+    ).rejects.toThrow("NEXT_REDIRECT:/app/duplas/pair_123");
+
+    expect(archivePairForUserMock).toHaveBeenCalledWith("pair_123", "user_123");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/app/duplas/arquivadas");
+  });
+
+  it("reactivates a pair and redirects back to the detail page", async () => {
+    authMock.mockResolvedValue({
+      user: {
+        id: "user_123",
+      },
+    });
+
+    await expect(
+      reactivateViewerPair(
+        buildFormData({
+          pairId: "pair_123",
+        }),
+      ),
+    ).rejects.toThrow("NEXT_REDIRECT:/app/duplas/pair_123");
+
+    expect(reactivatePairForUserMock).toHaveBeenCalledWith(
       "pair_123",
       "user_123",
     );

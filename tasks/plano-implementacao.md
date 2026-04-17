@@ -483,6 +483,8 @@ Entregar o principal valor do produto: calcular o acerto final de forma clara e 
 
 ## Etapa 11. Reabertura do período
 
+Status: concluída
+
 ### Objetivo
 
 Permitir correção de períodos encerrados com o mínimo de atrito.
@@ -498,12 +500,12 @@ Permitir correção de períodos encerrados com o mínimo de atrito.
 
 ### Checklist técnico sugerido
 
-- [ ] Garantir regra que permita reabrir apenas o último período encerrado da dupla.
-- [ ] Implementar confirmação explícita antes da reabertura.
-- [ ] Remover ou invalidar o resultado consolidado anterior de forma segura.
-- [ ] Reabrir período e participantes em uma única operação consistente.
-- [ ] Garantir que o novo cálculo só aconteça após novo fechamento completo.
-- [ ] Testar fluxo completo de reabrir, editar, fechar novamente e recalcular.
+- [x] Garantir regra que permita reabrir apenas o último período encerrado da dupla.
+- [x] Implementar confirmação explícita antes da reabertura.
+- [x] Remover ou invalidar o resultado consolidado anterior de forma segura.
+- [x] Reabrir período e participantes em uma única operação consistente.
+- [x] Garantir que o novo cálculo só aconteça após novo fechamento completo.
+- [x] Testar fluxo completo de reabrir, editar, fechar novamente e recalcular.
 
 ### Entregáveis
 
@@ -521,6 +523,8 @@ Permitir correção de períodos encerrados com o mínimo de atrito.
 
 ## Etapa 12. Histórico e arquivamento de dupla
 
+Status: concluída
+
 ### Objetivo
 
 Completar o fluxo de organização do uso contínuo do produto.
@@ -536,11 +540,11 @@ Completar o fluxo de organização do uso contínuo do produto.
 
 ### Checklist técnico sugerido
 
-- [ ] Criar consulta eficiente para histórico de períodos encerrados e resultados anteriores.
-- [ ] Construir área de duplas arquivadas separada da lista principal.
-- [ ] Implementar arquivamento sem perda de histórico ou vínculo de membros.
-- [ ] Implementar reativação devolvendo a dupla para a lista principal com estado íntegro.
-- [ ] Validar navegação entre dupla ativa, arquivada e histórico de resultados.
+- [x] Criar consulta eficiente para histórico de períodos encerrados e resultados anteriores.
+- [x] Construir área de duplas arquivadas separada da lista principal.
+- [x] Implementar arquivamento sem perda de histórico ou vínculo de membros.
+- [x] Implementar reativação devolvendo a dupla para a lista principal com estado íntegro.
+- [x] Validar navegação entre dupla ativa, arquivada e histórico de resultados.
 
 ### Entregáveis
 
@@ -559,6 +563,8 @@ Completar o fluxo de organização do uso contínuo do produto.
 
 ## Etapa 13. PWA
 
+Status: concluída
+
 ### Objetivo
 
 Transformar o produto em aplicação instalável com comportamento consistente em dispositivos compatíveis.
@@ -574,11 +580,11 @@ Transformar o produto em aplicação instalável com comportamento consistente e
 
 ### Checklist técnico sugerido
 
-- [ ] Definir estratégia de PWA e os requisitos mínimos para instalação na primeira versão.
-- [ ] Criar manifesto, ícones e metadados visuais coerentes com a identidade do produto.
-- [ ] Garantir comportamento instalável e navegação adequada quando aberto como app.
-- [ ] Validar instalação em Android e em desktop compatível.
-- [ ] Verificar se fluxos críticos como autenticação e convite continuam íntegros no modo instalado.
+- [x] Definir estratégia de PWA e os requisitos mínimos para instalação na primeira versão.
+- [x] Criar manifesto, ícones e metadados visuais coerentes com a identidade do produto.
+- [x] Garantir comportamento instalável e navegação adequada quando aberto como app.
+- [x] Validar instalação em Android e em desktop compatível.
+- [x] Verificar se fluxos críticos como autenticação e convite continuam íntegros no modo instalado.
 
 ### Entregáveis
 
@@ -596,6 +602,8 @@ Transformar o produto em aplicação instalável com comportamento consistente e
 
 ## Etapa 14. Polimento visual e experiência
 
+Status: concluída
+
 ### Objetivo
 
 Levar o produto do funcional para um nível de acabamento bom o suficiente para uso real e portfólio.
@@ -611,11 +619,11 @@ Levar o produto do funcional para um nível de acabamento bom o suficiente para 
 
 ### Checklist técnico sugerido
 
-- [ ] Revisar tela por tela a hierarquia visual das ações e informações principais.
-- [ ] Melhorar estados vazios, mensagens de erro e confirmações para reduzir ambiguidade.
-- [ ] Ajustar tipografia, contraste, espaçamento e tamanho de toque para uso frequente no celular.
-- [ ] Inserir animações leves apenas onde ajudam a compreensão do fluxo.
-- [ ] Fazer uma passada final de consistência visual entre telas, componentes e transições.
+- [x] Revisar tela por tela a hierarquia visual das ações e informações principais.
+- [x] Melhorar estados vazios, mensagens de erro e confirmações para reduzir ambiguidade.
+- [x] Ajustar tipografia, contraste, espaçamento e tamanho de toque para uso frequente no celular.
+- [x] Inserir animações leves apenas onde ajudam a compreensão do fluxo.
+- [x] Fazer uma passada final de consistência visual entre telas, componentes e transições.
 
 ### Entregáveis
 
@@ -632,6 +640,8 @@ Levar o produto do funcional para um nível de acabamento bom o suficiente para 
 - produto transmite confiança, clareza e acabamento acima de um CRUD comum
 
 ## Etapa 15. Testes, deploy e validação final
+
+Status: concluída
 
 ### Objetivo
 
@@ -652,12 +662,12 @@ Garantir que o fluxo principal esteja estável e preparado para o primeiro uso r
 
 ### Checklist técnico sugerido
 
-- [ ] Criar `seed` realista para demonstrar o produto e acelerar QA manual.
-- [ ] Cobrir com testes automatizados as regras críticas de convite, período ativo, fechamento, reabertura e cálculo.
-- [ ] Garantir ao menos um fluxo ponta a ponta automatizado ou rigidamente validado para login, convite, despesas e resultado.
-- [ ] Validar `lint`, `typecheck`, `build` e execução em modo de produção.
-- [ ] Preparar checklist de deploy na Hostinger, incluindo variáveis, banco, domínio, SSL, processo da aplicação e restart.
-- [ ] Definir rotina mínima de backup e ensaio de restauração antes do primeiro uso real.
+- [x] Criar `seed` realista para demonstrar o produto e acelerar QA manual.
+- [x] Cobrir com testes automatizados as regras críticas de convite, período ativo, fechamento, reabertura e cálculo.
+- [x] Garantir ao menos um fluxo ponta a ponta automatizado ou rigidamente validado para login, convite, despesas e resultado.
+- [x] Validar `lint`, `typecheck`, `build` e execução em modo de produção.
+- [x] Preparar checklist de deploy na Hostinger, incluindo variáveis, banco, domínio, SSL, processo da aplicação e restart.
+- [x] Definir rotina mínima de backup e ensaio de restauração antes do primeiro uso real.
 
 ### Entregáveis
 

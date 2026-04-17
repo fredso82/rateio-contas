@@ -1,4 +1,5 @@
 import {
+  PairStatus,
   PeriodParticipantStatus,
   PeriodStatus,
   Prisma,
@@ -205,6 +206,7 @@ export async function openPeriodForPair(
       const pair = await tx.pair.findFirst({
         where: {
           id: pairId,
+          status: PairStatus.active,
           members: {
             some: {
               userId,
@@ -474,7 +476,10 @@ export async function closePeriodParticipation(
         });
       }
 
-      const settlement = calculateSettlement(period.participants, period.expenses);
+      const settlement = calculateSettlement(
+        period.participants,
+        period.expenses,
+      );
 
       await tx.period.update({
         where: {
@@ -520,6 +525,102 @@ export async function closePeriodParticipation(
   );
 }
 
+export async function reopenPeriod(
+  periodId: string,
+  userId: string,
+  now = new Date(),
+) {
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "periods" WHERE id = ${periodId} FOR UPDATE`;
+
+      const period = await tx.period.findFirst({
+        where: {
+          id: periodId,
+          pair: {
+            status: PairStatus.active,
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          pairId: true,
+          status: true,
+        },
+      });
+
+      if (!period) {
+        throw new AppError("Período não encontrado.", "PERIOD_NOT_FOUND", 404);
+      }
+
+      if (period.status !== PeriodStatus.closed) {
+        throw new AppError(
+          "Somente períodos encerrados podem ser reabertos.",
+          "PERIOD_NOT_CLOSED",
+          409,
+        );
+      }
+
+      const latestPeriod = await tx.period.findFirst({
+        where: {
+          pairId: period.pairId,
+        },
+        orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+        },
+      });
+
+      if (!latestPeriod || latestPeriod.id !== periodId) {
+        throw new AppError(
+          "Só o período encerrado mais recente pode ser reaberto.",
+          "PERIOD_REOPEN_ONLY_LATEST",
+          409,
+        );
+      }
+
+      await tx.settlementResult.deleteMany({
+        where: {
+          periodId,
+        },
+      });
+
+      await tx.periodParticipant.updateMany({
+        where: {
+          periodId,
+        },
+        data: {
+          status: PeriodParticipantStatus.open,
+          closedAt: null,
+        },
+      });
+
+      return tx.period.update({
+        where: {
+          id: periodId,
+        },
+        data: {
+          status: PeriodStatus.open,
+          closedAt: null,
+          reopenedAt: now,
+        },
+        select: {
+          id: true,
+          status: true,
+          reopenedAt: true,
+        },
+      });
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
+}
+
 export async function getPairPeriodSummary(pairId: string, userId: string) {
   const pair = await prisma.pair.findFirst({
     where: {
@@ -532,6 +633,7 @@ export async function getPairPeriodSummary(pairId: string, userId: string) {
     },
     select: {
       id: true,
+      status: true,
       _count: {
         select: {
           members: true,
@@ -564,7 +666,9 @@ export async function getPairPeriodSummary(pairId: string, userId: string) {
   const period = pair.periods[0] ?? null;
 
   return {
-    canOpenNewPeriod: !period || period.status === PeriodStatus.closed,
+    canOpenNewPeriod:
+      pair.status === PairStatus.active &&
+      (!period || period.status === PeriodStatus.closed),
     latestPeriod: period
       ? {
           id: period.id,
@@ -578,7 +682,11 @@ export async function getPairPeriodSummary(pairId: string, userId: string) {
   };
 }
 
-export async function getPairPeriodWorkspace(pairId: string, userId: string) {
+export async function getPairPeriodWorkspace(
+  pairId: string,
+  userId: string,
+  selectedPeriodId?: string,
+) {
   const pair = await prisma.pair.findFirst({
     where: {
       id: pairId,
@@ -591,6 +699,8 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
     select: {
       id: true,
       name: true,
+      status: true,
+      archivedAt: true,
       _count: {
         select: {
           members: true,
@@ -618,66 +728,7 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
         take: 1,
         select: {
           id: true,
-          label: true,
           status: true,
-          openedAt: true,
-          closedAt: true,
-          participants: {
-            orderBy: {
-              createdAt: "asc",
-            },
-            select: {
-              userId: true,
-              status: true,
-              closedAt: true,
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  pixKey: true,
-                },
-              },
-            },
-          },
-          expenses: {
-            orderBy: [{ occurredOn: "desc" }, { createdAt: "desc" }],
-            select: {
-              id: true,
-              description: true,
-              amountCents: true,
-              occurredOn: true,
-              paidByUserId: true,
-              paidByUser: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-            },
-          },
-          settlement: {
-            select: {
-              id: true,
-              totalAmountCents: true,
-              sharePerPersonCents: true,
-              transferAmountCents: true,
-              payerUserId: true,
-              receiverUserId: true,
-              payerUser: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-              receiverUser: {
-                select: {
-                  id: true,
-                  name: true,
-                  pixKey: true,
-                },
-              },
-            },
-          },
         },
       },
     },
@@ -687,13 +738,16 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
     throw new AppError("Dupla não encontrada.", "PAIR_NOT_FOUND", 404);
   }
 
-  const latestPeriod = pair.periods[0] ?? null;
+  const latestPeriodMeta = pair.periods[0] ?? null;
+  const periodId = selectedPeriodId ?? latestPeriodMeta?.id ?? null;
 
-  if (!latestPeriod) {
+  if (!periodId) {
     return {
       pair: {
         id: pair.id,
         name: pair.name,
+        status: pair.status,
+        archivedAt: pair.archivedAt,
         isIncomplete: pair._count.members < 2,
         members: pair.members.map((member) => ({
           userId: member.userId,
@@ -702,22 +756,102 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
         })),
       },
       period: null,
-      canOpenNewPeriod: true,
+      canOpenNewPeriod: pair.status === PairStatus.active,
     };
   }
 
+  const selectedPeriod = await prisma.period.findFirst({
+    where: {
+      id: periodId,
+      pairId,
+    },
+    select: {
+      id: true,
+      label: true,
+      status: true,
+      openedAt: true,
+      closedAt: true,
+      reopenedAt: true,
+      participants: {
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          userId: true,
+          status: true,
+          closedAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              pixKey: true,
+            },
+          },
+        },
+      },
+      expenses: {
+        orderBy: [{ occurredOn: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          description: true,
+          amountCents: true,
+          occurredOn: true,
+          paidByUserId: true,
+          paidByUser: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      settlement: {
+        select: {
+          id: true,
+          totalAmountCents: true,
+          sharePerPersonCents: true,
+          transferAmountCents: true,
+          payerUserId: true,
+          receiverUserId: true,
+          payerUser: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          receiverUser: {
+            select: {
+              id: true,
+              name: true,
+              pixKey: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!selectedPeriod) {
+    throw new AppError("Período não encontrado.", "PERIOD_NOT_FOUND", 404);
+  }
+
+  const isLatestPeriod = latestPeriodMeta?.id === selectedPeriod.id;
+
   const totalByParticipant = buildParticipantTotalMap(
-    latestPeriod.participants,
-    latestPeriod.expenses,
+    selectedPeriod.participants,
+    selectedPeriod.expenses,
   );
   const viewerParticipant =
-    latestPeriod.participants.find((participant) => participant.userId === userId) ??
-    null;
+    selectedPeriod.participants.find(
+      (participant) => participant.userId === userId,
+    ) ?? null;
 
   return {
     pair: {
       id: pair.id,
       name: pair.name,
+      status: pair.status,
+      archivedAt: pair.archivedAt,
       isIncomplete: pair._count.members < 2,
       members: pair.members.map((member) => ({
         userId: member.userId,
@@ -725,22 +859,31 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
         pixKey: member.user.pixKey,
       })),
     },
-    canOpenNewPeriod: latestPeriod.status === PeriodStatus.closed,
+    canOpenNewPeriod:
+      pair.status === PairStatus.active &&
+      isLatestPeriod &&
+      selectedPeriod.status === PeriodStatus.closed,
     period: {
-      id: latestPeriod.id,
-      label: latestPeriod.label ?? buildPeriodLabel(latestPeriod.openedAt),
-      status: latestPeriod.status,
-      openedAt: latestPeriod.openedAt,
-      closedAt: latestPeriod.closedAt,
+      id: selectedPeriod.id,
+      label: selectedPeriod.label ?? buildPeriodLabel(selectedPeriod.openedAt),
+      status: selectedPeriod.status,
+      openedAt: selectedPeriod.openedAt,
+      closedAt: selectedPeriod.closedAt,
+      reopenedAt: selectedPeriod.reopenedAt,
+      isHistoricalView: !isLatestPeriod,
+      canReopen:
+        pair.status === PairStatus.active &&
+        isLatestPeriod &&
+        selectedPeriod.status === PeriodStatus.closed,
       canCreateExpense:
         viewerParticipant?.status === PeriodParticipantStatus.open &&
-        latestPeriod.status !== PeriodStatus.closed,
+        selectedPeriod.status !== PeriodStatus.closed,
       canCloseParticipation:
         viewerParticipant?.status === PeriodParticipantStatus.open &&
-        latestPeriod.status !== PeriodStatus.closed &&
+        selectedPeriod.status !== PeriodStatus.closed &&
         pair._count.members === 2,
       viewerParticipantStatus: viewerParticipant?.status ?? null,
-      participants: latestPeriod.participants.map((participant) => ({
+      participants: selectedPeriod.participants.map((participant) => ({
         userId: participant.userId,
         name: participant.user.name,
         pixKey: participant.user.pixKey,
@@ -748,7 +891,7 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
         closedAt: participant.closedAt,
         totalAmountCents: totalByParticipant[participant.userId] ?? 0,
       })),
-      expenses: latestPeriod.expenses.map((expense) => ({
+      expenses: selectedPeriod.expenses.map((expense) => ({
         id: expense.id,
         description: expense.description,
         amountCents: expense.amountCents,
@@ -758,18 +901,19 @@ export async function getPairPeriodWorkspace(pairId: string, userId: string) {
         isEditable:
           expense.paidByUserId === userId &&
           viewerParticipant?.status === PeriodParticipantStatus.open &&
-          latestPeriod.status !== PeriodStatus.closed,
+          selectedPeriod.status !== PeriodStatus.closed,
       })),
-      settlement: latestPeriod.settlement
+      settlement: selectedPeriod.settlement
         ? {
-            totalAmountCents: latestPeriod.settlement.totalAmountCents,
-            sharePerPersonCents: latestPeriod.settlement.sharePerPersonCents,
-            transferAmountCents: latestPeriod.settlement.transferAmountCents,
-            payerUserId: latestPeriod.settlement.payerUserId,
-            receiverUserId: latestPeriod.settlement.receiverUserId,
-            payerName: latestPeriod.settlement.payerUser?.name ?? null,
-            receiverName: latestPeriod.settlement.receiverUser?.name ?? null,
-            receiverPixKey: latestPeriod.settlement.receiverUser?.pixKey ?? null,
+            totalAmountCents: selectedPeriod.settlement.totalAmountCents,
+            sharePerPersonCents: selectedPeriod.settlement.sharePerPersonCents,
+            transferAmountCents: selectedPeriod.settlement.transferAmountCents,
+            payerUserId: selectedPeriod.settlement.payerUserId,
+            receiverUserId: selectedPeriod.settlement.receiverUserId,
+            payerName: selectedPeriod.settlement.payerUser?.name ?? null,
+            receiverName: selectedPeriod.settlement.receiverUser?.name ?? null,
+            receiverPixKey:
+              selectedPeriod.settlement.receiverUser?.pixKey ?? null,
           }
         : null,
     },
@@ -841,6 +985,7 @@ export async function getExpenseEditorSnapshot(
     },
     pairName: expense.period.pair.name,
     periodId: expense.period.id,
-    periodLabel: expense.period.label ?? buildPeriodLabel(expense.period.openedAt),
+    periodLabel:
+      expense.period.label ?? buildPeriodLabel(expense.period.openedAt),
   };
 }

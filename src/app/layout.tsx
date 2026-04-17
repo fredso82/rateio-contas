@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Source_Sans_3 } from "next/font/google";
 
 import { Providers } from "@/app/providers";
@@ -25,6 +25,34 @@ export const metadata: Metadata = {
   description:
     "Rateio de contas entre duas pessoas, com foco em clareza, rotina e acerto sem planilha.",
   applicationName: "Rateio Contas",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Rateio Contas",
+  },
+  icons: {
+    apple: "/pwa/icon-192",
+    icon: [
+      {
+        url: "/pwa/icon-192",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/pwa/icon-512",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#1c6a62",
 };
 
 export default function RootLayout({

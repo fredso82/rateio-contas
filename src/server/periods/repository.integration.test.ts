@@ -9,7 +9,9 @@ import {
   closePeriodParticipation,
   createExpenseForPeriod,
   deleteExpenseForUser,
+  getPairPeriodWorkspace,
   openPeriodForPair,
+  reopenPeriod,
   updateExpenseForUser,
 } from "@/server/periods/repository";
 import { resetDatabase } from "@/test/helpers/database";
@@ -112,11 +114,11 @@ describe("period repository integration", () => {
     const pair = await createPairWithMembers([owner.id]);
     const period = await openPeriodForPair(pair.id, owner.id);
 
-    await expect(closePeriodParticipation(period.id, owner.id)).rejects.toMatchObject(
-      {
-        code: "PAIR_INCOMPLETE_FOR_CLOSING",
-      },
-    );
+    await expect(
+      closePeriodParticipation(period.id, owner.id),
+    ).rejects.toMatchObject({
+      code: "PAIR_INCOMPLETE_FOR_CLOSING",
+    });
   });
 
   it("lets the open participant manage only their own expenses until closing", async () => {
@@ -255,6 +257,172 @@ describe("period repository integration", () => {
       transferAmountCents: 0,
       payerUserId: null,
       receiverUserId: null,
+    });
+  });
+
+  it("reopens the latest closed period, clears the previous settlement and recalculates after a new closing", async () => {
+    const [owner, guest] = await Promise.all([
+      createUser("Titular", "owner@example.com"),
+      createUser("Convidado", "guest@example.com"),
+    ]);
+    const pair = await createPairWithMembers([owner.id, guest.id]);
+    const period = await openPeriodForPair(pair.id, owner.id);
+
+    await createExpenseForPeriod(period.id, owner.id, {
+      description: "Mercado",
+      amountCents: 6000,
+      occurredOn: new Date("2026-04-16T12:00:00.000Z"),
+    });
+    await createExpenseForPeriod(period.id, guest.id, {
+      description: "Farmácia",
+      amountCents: 2000,
+      occurredOn: new Date("2026-04-17T12:00:00.000Z"),
+    });
+
+    await closePeriodParticipation(period.id, owner.id);
+    await closePeriodParticipation(period.id, guest.id);
+    await reopenPeriod(
+      period.id,
+      owner.id,
+      new Date("2026-04-18T12:00:00.000Z"),
+    );
+
+    const [reopenedPeriod, participantsAfterReopen, settlementAfterReopen] =
+      await Promise.all([
+        prisma.period.findUnique({
+          where: {
+            id: period.id,
+          },
+        }),
+        prisma.periodParticipant.findMany({
+          where: {
+            periodId: period.id,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        }),
+        prisma.settlementResult.findUnique({
+          where: {
+            periodId: period.id,
+          },
+        }),
+      ]);
+
+    expect(reopenedPeriod).toMatchObject({
+      id: period.id,
+      status: PeriodStatus.open,
+      closedAt: null,
+    });
+    expect(reopenedPeriod?.reopenedAt?.toISOString()).toBe(
+      "2026-04-18T12:00:00.000Z",
+    );
+    expect(
+      participantsAfterReopen.map((participant) => participant.status),
+    ).toEqual(["open", "open"]);
+    expect(settlementAfterReopen).toBeNull();
+
+    await createExpenseForPeriod(period.id, guest.id, {
+      description: "Padaria",
+      amountCents: 3000,
+      occurredOn: new Date("2026-04-18T12:00:00.000Z"),
+    });
+
+    await closePeriodParticipation(period.id, owner.id);
+    await closePeriodParticipation(period.id, guest.id);
+
+    const settlementAfterRecalculation =
+      await prisma.settlementResult.findUnique({
+        where: {
+          periodId: period.id,
+        },
+      });
+
+    expect(settlementAfterRecalculation).toMatchObject({
+      totalAmountCents: 11000,
+      sharePerPersonCents: 5500,
+      transferAmountCents: 500,
+      payerUserId: guest.id,
+      receiverUserId: owner.id,
+    });
+  });
+
+  it("allows consulting an older closed period from the pair history", async () => {
+    const [owner, guest] = await Promise.all([
+      createUser("Titular", "owner@example.com"),
+      createUser("Convidado", "guest@example.com"),
+    ]);
+    const pair = await createPairWithMembers([owner.id, guest.id]);
+    const firstPeriod = await openPeriodForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-01T12:00:00.000Z"),
+    );
+
+    await createExpenseForPeriod(firstPeriod.id, owner.id, {
+      description: "Mercado",
+      amountCents: 5000,
+      occurredOn: new Date("2026-04-01T12:00:00.000Z"),
+    });
+    await closePeriodParticipation(firstPeriod.id, owner.id);
+    await closePeriodParticipation(firstPeriod.id, guest.id);
+
+    const secondPeriod = await openPeriodForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-15T12:00:00.000Z"),
+    );
+
+    await createExpenseForPeriod(secondPeriod.id, guest.id, {
+      description: "Internet",
+      amountCents: 4000,
+      occurredOn: new Date("2026-04-15T12:00:00.000Z"),
+    });
+    await closePeriodParticipation(secondPeriod.id, owner.id);
+    await closePeriodParticipation(secondPeriod.id, guest.id);
+
+    const historyWorkspace = await getPairPeriodWorkspace(
+      pair.id,
+      owner.id,
+      firstPeriod.id,
+    );
+
+    expect(historyWorkspace.period).toMatchObject({
+      id: firstPeriod.id,
+      isHistoricalView: true,
+      canReopen: false,
+      settlement: {
+        transferAmountCents: 2500,
+      },
+    });
+  });
+
+  it("only reopens the most recent closed period", async () => {
+    const [owner, guest] = await Promise.all([
+      createUser("Titular", "owner@example.com"),
+      createUser("Convidado", "guest@example.com"),
+    ]);
+    const pair = await createPairWithMembers([owner.id, guest.id]);
+    const firstPeriod = await openPeriodForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-01T12:00:00.000Z"),
+    );
+
+    await closePeriodParticipation(firstPeriod.id, owner.id);
+    await closePeriodParticipation(firstPeriod.id, guest.id);
+
+    const secondPeriod = await openPeriodForPair(
+      pair.id,
+      owner.id,
+      new Date("2026-04-15T12:00:00.000Z"),
+    );
+
+    await closePeriodParticipation(secondPeriod.id, owner.id);
+    await closePeriodParticipation(secondPeriod.id, guest.id);
+
+    await expect(reopenPeriod(firstPeriod.id, owner.id)).rejects.toMatchObject({
+      code: "PERIOD_REOPEN_ONLY_LATEST",
     });
   });
 });
