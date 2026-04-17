@@ -63,3 +63,19 @@
 - A suíte de integração cobre criação de conta por `credentials`, verificação de senha, vínculo e criação de conta via `Google` e snapshot do painel autenticado.
 - O banco de teste usa `rateio_contas_test` por padrão e é preparado automaticamente por `src/test/scripts/prepare-test-db.ts`.
 - Todos os artefatos executáveis adicionados para testes ficaram sob `src`, com exceção dos arquivos de configuração exigidos pelo próprio framework (`next.config.ts`, `next-env.d.ts` e afins).
+
+## Tarefas atuais
+
+- [x] Adicionar marcação de `profileCompletedAt` no schema e migração correspondente
+- [x] Implementar fluxo de primeiro acesso e edição de perfil com redirecionamento seguro
+- [x] Implementar listagem, criação e detalhe de duplas com navegação dedicada
+- [x] Implementar geração, regeneração e aceite automático de convites por link
+- [x] Cobrir etapas 4 a 6 com testes unitários e de integração
+- [x] Atualizar `tasks/plano-implementacao.md` marcando as etapas 4 a 6 como concluídas
+
+## Revisão atual
+
+- A etapa 4 agora força o complemento de perfil no primeiro acesso via `profileCompletedAt`, mantendo nome como obrigatório e chave Pix como opcional, com edição posterior em `/app/perfil`.
+- A etapa 5 agora entrega a área de duplas em `/app/duplas`, com estado vazio, criação de nova dupla, membership automático do criador e tela de detalhe destacando claramente quando a dupla ainda está incompleta.
+- A etapa 6 agora entrega geração de convites com validade de `24h`, revogação do link anterior ao regenerar, rota de convite com preservação de `callbackUrl`, aceite automático para usuário autenticado e bloqueios para convite inválido, expirado, revogado, já usado ou dupla cheia.
+- A cobertura de testes passou a incluir validações e server actions de perfil/duplas, além de integração para persistência de perfil, criação/listagem de duplas e ciclo de vida dos convites.

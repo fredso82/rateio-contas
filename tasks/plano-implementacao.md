@@ -180,6 +180,8 @@ Permitir entrada segura no sistema com os dois métodos previstos no MVP.
 
 ## Etapa 4. Perfil do usuário
 
+Status: concluída
+
 ### Objetivo
 
 Permitir que cada usuário complete e atualize seus dados essenciais para o rateio.
@@ -194,11 +196,11 @@ Permitir que cada usuário complete e atualize seus dados essenciais para o rate
 
 ### Checklist técnico sugerido
 
-- [ ] Definir quais campos são obrigatórios no primeiro acesso e quais podem ser adiados.
-- [ ] Criar regra de redirecionamento para complemento de perfil após autenticação inicial.
-- [ ] Implementar formulário de perfil inicial com foco em rapidez no celular.
-- [ ] Implementar edição posterior do perfil sem quebrar o fluxo principal da aplicação.
-- [ ] Validar cenários de primeiro acesso via `credentials` e via `Google`.
+- [x] Definir quais campos são obrigatórios no primeiro acesso e quais podem ser adiados.
+- [x] Criar regra de redirecionamento para complemento de perfil após autenticação inicial.
+- [x] Implementar formulário de perfil inicial com foco em rapidez no celular.
+- [x] Implementar edição posterior do perfil sem quebrar o fluxo principal da aplicação.
+- [x] Validar cenários de primeiro acesso via `credentials` e via `Google`.
 
 ### Entregáveis
 
@@ -216,6 +218,8 @@ Permitir que cada usuário complete e atualize seus dados essenciais para o rate
 
 ## Etapa 5. Estrutura de duplas
 
+Status: concluída
+
 ### Objetivo
 
 Permitir criação e visualização de duplas, que são a unidade central do produto.
@@ -231,11 +235,11 @@ Permitir criação e visualização de duplas, que são a unidade central do pro
 
 ### Checklist técnico sugerido
 
-- [ ] Criar consultas para listar duplas ativas, arquivadas e memberships do usuário logado.
-- [ ] Implementar criação de dupla com inclusão automática do criador como primeiro membro.
-- [ ] Construir tela inicial com estado vazio e CTA forte para primeira dupla.
-- [ ] Construir tela de detalhe da dupla com destaque para estado incompleto e próximos passos.
-- [ ] Garantir navegação clara entre lista de duplas, detalhe da dupla e criação de nova dupla.
+- [x] Criar consultas para listar duplas ativas, arquivadas e memberships do usuário logado.
+- [x] Implementar criação de dupla com inclusão automática do criador como primeiro membro.
+- [x] Construir tela inicial com estado vazio e CTA forte para primeira dupla.
+- [x] Construir tela de detalhe da dupla com destaque para estado incompleto e próximos passos.
+- [x] Garantir navegação clara entre lista de duplas, detalhe da dupla e criação de nova dupla.
 
 ### Entregáveis
 
@@ -256,6 +260,8 @@ Permitir criação e visualização de duplas, que são a unidade central do pro
 
 ## Etapa 6. Convites por link
 
+Status: concluída
+
 ### Objetivo
 
 Permitir formação da dupla por meio de link compartilhável com validade de 24 horas.
@@ -275,12 +281,12 @@ Permitir formação da dupla por meio de link compartilhável com validade de 24
 
 ### Checklist técnico sugerido
 
-- [ ] Definir ciclo de vida do convite, incluindo criação, expiração, consumo, revogação e regeneração.
-- [ ] Implementar geração de token único com validade de `24h` e persistência consistente.
-- [ ] Criar rota de entrada por convite com tratamento de usuário autenticado e não autenticado.
-- [ ] Garantir retorno ao convite após login ou cadastro, sem perder o contexto.
-- [ ] Tratar idempotência para quem já é membro e concorrência quando duas pessoas tentarem aceitar ao mesmo tempo.
-- [ ] Executar smoke test para convite válido, expirado, usado, revogado e já pertencente ao membro.
+- [x] Definir ciclo de vida do convite, incluindo criação, expiração, consumo, revogação e regeneração.
+- [x] Implementar geração de token único com validade de `24h` e persistência consistente.
+- [x] Criar rota de entrada por convite com tratamento de usuário autenticado e não autenticado.
+- [x] Garantir retorno ao convite após login ou cadastro, sem perder o contexto.
+- [x] Tratar idempotência para quem já é membro e concorrência quando duas pessoas tentarem aceitar ao mesmo tempo.
+- [x] Executar smoke test para convite válido, expirado, usado, revogado e já pertencente ao membro.
 
 ### Entregáveis
 
