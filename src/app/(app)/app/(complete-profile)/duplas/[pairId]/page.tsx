@@ -15,6 +15,8 @@ import { Card } from "@/components/ui/card";
 import { getPairInviteSnapshot } from "@/server/invites/repository";
 import { generatePairInvite } from "@/server/pairs/actions";
 import { getPairDetails } from "@/server/pairs/repository";
+import { openPairPeriod } from "@/server/periods/actions";
+import { getPairPeriodSummary } from "@/server/periods/repository";
 
 type PairDetailPageProps = {
   params: Promise<{
@@ -30,9 +32,10 @@ export default async function PairDetailPage({ params }: PairDetailPageProps) {
   }
 
   const { pairId } = await params;
-  const [{ pair, isIncomplete }, latestInvite] = await Promise.all([
+  const [{ pair, isIncomplete }, latestInvite, periodSummary] = await Promise.all([
     getPairDetails(pairId, session.user.id),
     getPairInviteSnapshot(pairId, session.user.id),
+    getPairPeriodSummary(pairId, session.user.id),
   ]);
 
   const hasActiveInvite =
@@ -134,6 +137,56 @@ export default async function PairDetailPage({ params }: PairDetailPageProps) {
                 </p>
               </div>
             </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-3xl leading-none">Período atual</h2>
+                <p className="mt-2 text-sm text-muted">
+                  {periodSummary.latestPeriod
+                    ? `${periodSummary.latestPeriod.label} · ${periodSummary.latestPeriod.expenseCount} despesa(s).`
+                    : "Ainda não existe nenhum período de rateio para esta dupla."}
+                </p>
+              </div>
+
+              {periodSummary.latestPeriod ? (
+                <Button asChild variant="secondary">
+                  <Link href={`/app/duplas/${pair.id}/periodo`}>
+                    Ver período
+                    <ArrowLeft className="size-4 rotate-180" />
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+
+            <div className="mt-5 rounded-[1.5rem] border border-line-strong bg-white/75 p-4 text-sm text-muted">
+              {periodSummary.latestPeriod ? (
+                periodSummary.latestPeriod.status === "closed" ? (
+                  "O último período já foi encerrado. Você pode abrir um novo ciclo quando quiser."
+                ) : periodSummary.latestPeriod.status === "partially_closed" ? (
+                  "Existe um período parcialmente fechado. Só um novo período poderá ser aberto depois do fechamento final."
+                ) : (
+                  "Existe um período aberto agora. A segunda pessoa entra nele automaticamente se aceitar o convite neste momento."
+                )
+              ) : isIncomplete ? (
+                "Você já pode abrir o primeiro período mesmo antes da dupla ficar completa."
+              ) : (
+                "Abra o primeiro período para começar os lançamentos desta dupla."
+              )}
+            </div>
+
+            {periodSummary.canOpenNewPeriod ? (
+              <form action={openPairPeriod} className="mt-5">
+                <input name="pairId" type="hidden" value={pair.id} />
+                <Button type="submit">
+                  {periodSummary.latestPeriod
+                    ? "Abrir novo período"
+                    : "Abrir primeiro período"}
+                  <Plus className="size-4" />
+                </Button>
+              </form>
+            ) : null}
           </Card>
 
           <Card className="p-6">

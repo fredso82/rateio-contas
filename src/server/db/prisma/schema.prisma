@@ -187,13 +187,13 @@ model SettlementResult {
   periodId           String   @unique
   totalAmountCents   Int
   sharePerPersonCents Int
-  payerUserId        String
-  receiverUserId     String
+  payerUserId        String?
+  receiverUserId     String?
   transferAmountCents Int
   calculatedAt       DateTime @default(now())
   period             Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  payerUser          User     @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
-  receiverUser       User     @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Restrict)
+  payerUser          User?    @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
+  receiverUser       User?    @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Restrict)
 
   @@index([payerUserId])
   @@index([receiverUserId])

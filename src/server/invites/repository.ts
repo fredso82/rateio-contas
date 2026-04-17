@@ -9,6 +9,7 @@ import {
 
 import { AppError } from "@/lib/errors";
 import { prisma } from "@/server/db/client";
+import { addMemberToActivePeriod } from "@/server/periods/repository";
 
 export const INVITE_TTL_IN_HOURS = 24;
 
@@ -450,6 +451,8 @@ export async function acceptInvite(
           userId,
         },
       });
+
+      await addMemberToActivePeriod(tx, invite.pairId, userId);
 
       await tx.invite.update({
         where: {

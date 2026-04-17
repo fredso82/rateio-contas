@@ -306,6 +306,8 @@ Permitir formação da dupla por meio de link compartilhável com validade de 24
 
 ## Etapa 7. Períodos de rateio
 
+Status: concluída
+
 ### Objetivo
 
 Criar a base operacional do ciclo de rateio dentro de cada dupla.
@@ -322,12 +324,12 @@ Criar a base operacional do ciclo de rateio dentro de cada dupla.
 
 ### Checklist técnico sugerido
 
-- [ ] Definir algoritmo de `label` automático do período e garantir consistência com locale e timezone do produto.
-- [ ] Implementar abertura de período em transação, evitando criação duplicada em clique concorrente.
-- [ ] Criar `PeriodParticipant` apenas para os membros presentes no momento da abertura.
-- [ ] Garantir inclusão automática do segundo membro no período ativo quando ele entrar depois.
-- [ ] Expor estado atual do período na tela da dupla com mensagens claras para dupla incompleta e dupla completa.
-- [ ] Validar regra de unicidade de período ativo tanto na aplicação quanto no banco, quando possível.
+- [x] Definir algoritmo de `label` automático do período e garantir consistência com locale e timezone do produto.
+- [x] Implementar abertura de período em transação, evitando criação duplicada em clique concorrente.
+- [x] Criar `PeriodParticipant` apenas para os membros presentes no momento da abertura.
+- [x] Garantir inclusão automática do segundo membro no período ativo quando ele entrar depois.
+- [x] Expor estado atual do período na tela da dupla com mensagens claras para dupla incompleta e dupla completa.
+- [x] Validar regra de unicidade de período ativo tanto na aplicação quanto no banco, quando possível.
 
 ### Entregáveis
 
@@ -348,6 +350,8 @@ Criar a base operacional do ciclo de rateio dentro de cada dupla.
 
 ## Etapa 8. Cadastro e gestão de despesas
 
+Status: concluída
+
 ### Objetivo
 
 Implementar o coração do uso diário do produto: lançar gastos com rapidez e clareza.
@@ -366,12 +370,12 @@ Implementar o coração do uso diário do produto: lançar gastos com rapidez e 
 
 ### Checklist técnico sugerido
 
-- [ ] Criar schema de validação para despesa, incluindo descrição, valor em `BRL` e data.
-- [ ] Implementar criação, edição e exclusão de despesa sempre vinculada ao usuário logado.
-- [ ] Garantir que apenas participantes abertos possam manipular suas próprias despesas.
-- [ ] Construir experiência de lançamento de despesa otimizada para celular, com baixo atrito.
-- [ ] Exibir lista de despesas, totais por participante e resumo do período com atualização confiável.
-- [ ] Validar conversão de valor para centavos, datas e arredondamentos antes de considerar a etapa pronta.
+- [x] Criar schema de validação para despesa, incluindo descrição, valor em `BRL` e data.
+- [x] Implementar criação, edição e exclusão de despesa sempre vinculada ao usuário logado.
+- [x] Garantir que apenas participantes abertos possam manipular suas próprias despesas.
+- [x] Construir experiência de lançamento de despesa otimizada para celular, com baixo atrito.
+- [x] Exibir lista de despesas, totais por participante e resumo do período com atualização confiável.
+- [x] Validar conversão de valor para centavos, datas e arredondamentos antes de considerar a etapa pronta.
 
 ### Entregáveis
 
@@ -390,6 +394,8 @@ Implementar o coração do uso diário do produto: lançar gastos com rapidez e 
 
 ## Etapa 9. Fechamento individual do período
 
+Status: concluída
+
 ### Objetivo
 
 Transformar o período em fluxo controlado por participação individual.
@@ -406,12 +412,12 @@ Transformar o período em fluxo controlado por participação individual.
 
 ### Checklist técnico sugerido
 
-- [ ] Implementar fechamento individual em transação, com atualização consistente do status do participante e do período.
-- [ ] Bloquear fechamento enquanto a dupla estiver incompleta.
-- [ ] Impedir edição e exclusão de despesas do participante após o fechamento.
-- [ ] Garantir que o outro participante continue podendo lançar e ajustar despesas enquanto estiver aberto.
-- [ ] Exibir status de cada participante de forma legível na interface.
-- [ ] Testar o fluxo em que uma pessoa fecha antes da outra e o período permanece parcialmente fechado.
+- [x] Implementar fechamento individual em transação, com atualização consistente do status do participante e do período.
+- [x] Bloquear fechamento enquanto a dupla estiver incompleta.
+- [x] Impedir edição e exclusão de despesas do participante após o fechamento.
+- [x] Garantir que o outro participante continue podendo lançar e ajustar despesas enquanto estiver aberto.
+- [x] Exibir status de cada participante de forma legível na interface.
+- [x] Testar o fluxo em que uma pessoa fecha antes da outra e o período permanece parcialmente fechado.
 
 ### Entregáveis
 
@@ -432,6 +438,8 @@ Transformar o período em fluxo controlado por participação individual.
 
 ## Etapa 10. Cálculo do resultado final
 
+Status: concluída
+
 ### Objetivo
 
 Entregar o principal valor do produto: calcular o acerto final de forma clara e confiável.
@@ -451,12 +459,12 @@ Entregar o principal valor do produto: calcular o acerto final de forma clara e 
 
 ### Checklist técnico sugerido
 
-- [ ] Centralizar a regra de cálculo em uma função ou serviço puro, fácil de testar.
-- [ ] Garantir que o resultado seja persistido de forma atômica quando o segundo participante fechar.
-- [ ] Tratar corretamente cenários com acerto positivo, acerto negativo implícito e acerto zero.
-- [ ] Construir tela de resultado com foco em clareza visual e leitura rápida no celular.
-- [ ] Exibir chave Pix do recebedor quando existir e estado alternativo quando não existir.
-- [ ] Cobrir com testes ao menos três cenários: uma pessoa deve pagar, outra deve pagar e ninguém deve nada.
+- [x] Centralizar a regra de cálculo em uma função ou serviço puro, fácil de testar.
+- [x] Garantir que o resultado seja persistido de forma atômica quando o segundo participante fechar.
+- [x] Tratar corretamente cenários com acerto positivo, acerto negativo implícito e acerto zero.
+- [x] Construir tela de resultado com foco em clareza visual e leitura rápida no celular.
+- [x] Exibir chave Pix do recebedor quando existir e estado alternativo quando não existir.
+- [x] Cobrir com testes ao menos três cenários: uma pessoa deve pagar, outra deve pagar e ninguém deve nada.
 
 ### Entregáveis
 
