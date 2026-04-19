@@ -39,7 +39,9 @@ model User {
   id                     String             @id @default(cuid())
   name                   String
   email                  String             @unique
+  emailVerifiedAt        DateTime?
   pixKey                 String?
+  profileCompletedAt     DateTime?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
   authAccounts           AuthAccount[]
@@ -105,7 +107,9 @@ model PairMember {
 model Invite {
   id               String       @id @default(cuid())
   pairId           String
-  token            String       @unique
+  token            String?      @unique
+  tokenHash        String?      @unique
+  tokenCiphertext  String?
   createdByUserId  String
   status           InviteStatus @default(pending)
   expiresAt        DateTime
@@ -186,13 +190,13 @@ model SettlementResult {
   periodId           String   @unique
   totalAmountCents   Int
   sharePerPersonCents Int
-  payerUserId        String
-  receiverUserId     String
+  payerUserId        String?
+  receiverUserId     String?
   transferAmountCents Int
   calculatedAt       DateTime @default(now())
   period             Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  payerUser          User     @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
-  receiverUser       User     @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Restrict)
+  payerUser          User?    @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
+  receiverUser       User?    @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Restrict)
 
   @@index([payerUserId])
   @@index([receiverUserId])

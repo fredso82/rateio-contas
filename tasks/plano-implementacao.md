@@ -50,6 +50,8 @@ Este plano transforma a especificação atual do `rateio-contas` em uma sequênc
 
 ## Etapa 1. Fundação do projeto
 
+Status: concluída
+
 ### Objetivo
 
 Criar a base técnica do app para permitir evolução segura e rápida.
@@ -67,12 +69,12 @@ Criar a base técnica do app para permitir evolução segura e rápida.
 
 ### Checklist técnico sugerido
 
-- [ ] Fechar estrutura base do app, incluindo organização de rotas, aliases e separação entre UI, domínio e acesso a dados.
-- [ ] Subir `PostgreSQL` local, conectar `Prisma`, aplicar migração inicial e gerar client.
-- [ ] Criar `envs` mínimas para local e produção, incluindo autenticação, banco e URL base da aplicação.
-- [ ] Preparar scripts de `dev`, `lint`, `typecheck`, `build`, `db:migrate` e `db:seed`.
-- [ ] Definir padrão inicial para logs, captura de erros e respostas de falha em ações de servidor.
-- [ ] Validar que a aplicação sobe, conecta no banco e gera build de produção sem erro.
+- [x] Fechar estrutura base do app, incluindo organização de rotas, aliases e separação entre UI, domínio e acesso a dados.
+- [x] Subir `PostgreSQL` local, conectar `Prisma`, aplicar migração inicial e gerar client.
+- [x] Criar `envs` mínimas para local e produção, incluindo autenticação, banco e URL base da aplicação.
+- [x] Preparar scripts de `dev`, `lint`, `typecheck`, `build`, `db:migrate` e `db:seed`.
+- [x] Definir padrão inicial para logs, captura de erros e respostas de falha em ações de servidor.
+- [x] Validar que a aplicação sobe, conecta no banco e gera build de produção sem erro.
 
 ### Entregáveis
 
@@ -96,6 +98,8 @@ Criar a base técnica do app para permitir evolução segura e rápida.
 
 ## Etapa 2. Base visual e shell da aplicação
 
+Status: concluída
+
 ### Objetivo
 
 Montar a casca da aplicação com identidade visual inicial e navegação coerente com o produto.
@@ -110,11 +114,11 @@ Montar a casca da aplicação com identidade visual inicial e navegação coeren
 
 ### Checklist técnico sugerido
 
-- [ ] Definir identidade visual inicial com tokens de cor, tipografia, espaçamento e radius.
-- [ ] Criar layout raiz da aplicação, separando claramente áreas públicas, autenticadas e páginas de fluxo especial como convite.
-- [ ] Implementar componentes base com variantes suficientes para reutilização sem retrabalho imediato.
-- [ ] Padronizar estados de loading, erro, sucesso e confirmação com comportamento consistente.
-- [ ] Montar ao menos uma tela autenticada e uma tela pública usando apenas a base criada, para testar a robustez do shell.
+- [x] Definir identidade visual inicial com tokens de cor, tipografia, espaçamento e radius.
+- [x] Criar layout raiz da aplicação, separando claramente áreas públicas, autenticadas e páginas de fluxo especial como convite.
+- [x] Implementar componentes base com variantes suficientes para reutilização sem retrabalho imediato.
+- [x] Padronizar estados de loading, erro, sucesso e confirmação com comportamento consistente.
+- [x] Montar ao menos uma tela autenticada e uma tela pública usando apenas a base criada, para testar a robustez do shell.
 
 ### Entregáveis
 
@@ -133,6 +137,8 @@ Montar a casca da aplicação com identidade visual inicial e navegação coeren
 
 ## Etapa 3. Autenticação e sessão
 
+Status: concluída
+
 ### Objetivo
 
 Permitir entrada segura no sistema com os dois métodos previstos no MVP.
@@ -149,12 +155,12 @@ Permitir entrada segura no sistema com os dois métodos previstos no MVP.
 
 ### Checklist técnico sugerido
 
-- [ ] Fechar solução de autenticação, sessão e estratégia de persistência para web e PWA.
-- [ ] Implementar cadastro e login com `email/senha`, incluindo hash seguro e validação de formulário.
-- [ ] Implementar login com `Google` e mapear corretamente contas para o mesmo usuário quando necessário.
-- [ ] Proteger rotas privadas e padronizar redirecionamentos após login, logout e tentativa de acesso sem sessão.
-- [ ] Garantir retorno correto ao fluxo de convite após autenticação.
-- [ ] Executar smoke test com conta nova, conta existente, logout e retorno com sessão persistida.
+- [x] Fechar solução de autenticação, sessão e estratégia de persistência para web e PWA.
+- [x] Implementar cadastro e login com `email/senha`, incluindo hash seguro e validação de formulário.
+- [x] Implementar login com `Google` e mapear corretamente contas para o mesmo usuário quando necessário.
+- [x] Proteger rotas privadas e padronizar redirecionamentos após login, logout e tentativa de acesso sem sessão.
+- [x] Garantir retorno correto ao fluxo de convite após autenticação.
+- [x] Executar smoke test com conta nova, conta existente, logout e retorno com sessão persistida.
 
 ### Entregáveis
 
@@ -174,6 +180,8 @@ Permitir entrada segura no sistema com os dois métodos previstos no MVP.
 
 ## Etapa 4. Perfil do usuário
 
+Status: concluída
+
 ### Objetivo
 
 Permitir que cada usuário complete e atualize seus dados essenciais para o rateio.
@@ -188,11 +196,11 @@ Permitir que cada usuário complete e atualize seus dados essenciais para o rate
 
 ### Checklist técnico sugerido
 
-- [ ] Definir quais campos são obrigatórios no primeiro acesso e quais podem ser adiados.
-- [ ] Criar regra de redirecionamento para complemento de perfil após autenticação inicial.
-- [ ] Implementar formulário de perfil inicial com foco em rapidez no celular.
-- [ ] Implementar edição posterior do perfil sem quebrar o fluxo principal da aplicação.
-- [ ] Validar cenários de primeiro acesso via `credentials` e via `Google`.
+- [x] Definir quais campos são obrigatórios no primeiro acesso e quais podem ser adiados.
+- [x] Criar regra de redirecionamento para complemento de perfil após autenticação inicial.
+- [x] Implementar formulário de perfil inicial com foco em rapidez no celular.
+- [x] Implementar edição posterior do perfil sem quebrar o fluxo principal da aplicação.
+- [x] Validar cenários de primeiro acesso via `credentials` e via `Google`.
 
 ### Entregáveis
 
@@ -210,6 +218,8 @@ Permitir que cada usuário complete e atualize seus dados essenciais para o rate
 
 ## Etapa 5. Estrutura de duplas
 
+Status: concluída
+
 ### Objetivo
 
 Permitir criação e visualização de duplas, que são a unidade central do produto.
@@ -225,11 +235,11 @@ Permitir criação e visualização de duplas, que são a unidade central do pro
 
 ### Checklist técnico sugerido
 
-- [ ] Criar consultas para listar duplas ativas, arquivadas e memberships do usuário logado.
-- [ ] Implementar criação de dupla com inclusão automática do criador como primeiro membro.
-- [ ] Construir tela inicial com estado vazio e CTA forte para primeira dupla.
-- [ ] Construir tela de detalhe da dupla com destaque para estado incompleto e próximos passos.
-- [ ] Garantir navegação clara entre lista de duplas, detalhe da dupla e criação de nova dupla.
+- [x] Criar consultas para listar duplas ativas, arquivadas e memberships do usuário logado.
+- [x] Implementar criação de dupla com inclusão automática do criador como primeiro membro.
+- [x] Construir tela inicial com estado vazio e CTA forte para primeira dupla.
+- [x] Construir tela de detalhe da dupla com destaque para estado incompleto e próximos passos.
+- [x] Garantir navegação clara entre lista de duplas, detalhe da dupla e criação de nova dupla.
 
 ### Entregáveis
 
@@ -250,6 +260,8 @@ Permitir criação e visualização de duplas, que são a unidade central do pro
 
 ## Etapa 6. Convites por link
 
+Status: concluída
+
 ### Objetivo
 
 Permitir formação da dupla por meio de link compartilhável com validade de 24 horas.
@@ -269,12 +281,12 @@ Permitir formação da dupla por meio de link compartilhável com validade de 24
 
 ### Checklist técnico sugerido
 
-- [ ] Definir ciclo de vida do convite, incluindo criação, expiração, consumo, revogação e regeneração.
-- [ ] Implementar geração de token único com validade de `24h` e persistência consistente.
-- [ ] Criar rota de entrada por convite com tratamento de usuário autenticado e não autenticado.
-- [ ] Garantir retorno ao convite após login ou cadastro, sem perder o contexto.
-- [ ] Tratar idempotência para quem já é membro e concorrência quando duas pessoas tentarem aceitar ao mesmo tempo.
-- [ ] Executar smoke test para convite válido, expirado, usado, revogado e já pertencente ao membro.
+- [x] Definir ciclo de vida do convite, incluindo criação, expiração, consumo, revogação e regeneração.
+- [x] Implementar geração de token único com validade de `24h` e persistência consistente.
+- [x] Criar rota de entrada por convite com tratamento de usuário autenticado e não autenticado.
+- [x] Garantir retorno ao convite após login ou cadastro, sem perder o contexto.
+- [x] Tratar idempotência para quem já é membro e concorrência quando duas pessoas tentarem aceitar ao mesmo tempo.
+- [x] Executar smoke test para convite válido, expirado, usado, revogado e já pertencente ao membro.
 
 ### Entregáveis
 
@@ -294,6 +306,8 @@ Permitir formação da dupla por meio de link compartilhável com validade de 24
 
 ## Etapa 7. Períodos de rateio
 
+Status: concluída
+
 ### Objetivo
 
 Criar a base operacional do ciclo de rateio dentro de cada dupla.
@@ -310,12 +324,12 @@ Criar a base operacional do ciclo de rateio dentro de cada dupla.
 
 ### Checklist técnico sugerido
 
-- [ ] Definir algoritmo de `label` automático do período e garantir consistência com locale e timezone do produto.
-- [ ] Implementar abertura de período em transação, evitando criação duplicada em clique concorrente.
-- [ ] Criar `PeriodParticipant` apenas para os membros presentes no momento da abertura.
-- [ ] Garantir inclusão automática do segundo membro no período ativo quando ele entrar depois.
-- [ ] Expor estado atual do período na tela da dupla com mensagens claras para dupla incompleta e dupla completa.
-- [ ] Validar regra de unicidade de período ativo tanto na aplicação quanto no banco, quando possível.
+- [x] Definir algoritmo de `label` automático do período e garantir consistência com locale e timezone do produto.
+- [x] Implementar abertura de período em transação, evitando criação duplicada em clique concorrente.
+- [x] Criar `PeriodParticipant` apenas para os membros presentes no momento da abertura.
+- [x] Garantir inclusão automática do segundo membro no período ativo quando ele entrar depois.
+- [x] Expor estado atual do período na tela da dupla com mensagens claras para dupla incompleta e dupla completa.
+- [x] Validar regra de unicidade de período ativo tanto na aplicação quanto no banco, quando possível.
 
 ### Entregáveis
 
@@ -336,6 +350,8 @@ Criar a base operacional do ciclo de rateio dentro de cada dupla.
 
 ## Etapa 8. Cadastro e gestão de despesas
 
+Status: concluída
+
 ### Objetivo
 
 Implementar o coração do uso diário do produto: lançar gastos com rapidez e clareza.
@@ -354,12 +370,12 @@ Implementar o coração do uso diário do produto: lançar gastos com rapidez e 
 
 ### Checklist técnico sugerido
 
-- [ ] Criar schema de validação para despesa, incluindo descrição, valor em `BRL` e data.
-- [ ] Implementar criação, edição e exclusão de despesa sempre vinculada ao usuário logado.
-- [ ] Garantir que apenas participantes abertos possam manipular suas próprias despesas.
-- [ ] Construir experiência de lançamento de despesa otimizada para celular, com baixo atrito.
-- [ ] Exibir lista de despesas, totais por participante e resumo do período com atualização confiável.
-- [ ] Validar conversão de valor para centavos, datas e arredondamentos antes de considerar a etapa pronta.
+- [x] Criar schema de validação para despesa, incluindo descrição, valor em `BRL` e data.
+- [x] Implementar criação, edição e exclusão de despesa sempre vinculada ao usuário logado.
+- [x] Garantir que apenas participantes abertos possam manipular suas próprias despesas.
+- [x] Construir experiência de lançamento de despesa otimizada para celular, com baixo atrito.
+- [x] Exibir lista de despesas, totais por participante e resumo do período com atualização confiável.
+- [x] Validar conversão de valor para centavos, datas e arredondamentos antes de considerar a etapa pronta.
 
 ### Entregáveis
 
@@ -378,6 +394,8 @@ Implementar o coração do uso diário do produto: lançar gastos com rapidez e 
 
 ## Etapa 9. Fechamento individual do período
 
+Status: concluída
+
 ### Objetivo
 
 Transformar o período em fluxo controlado por participação individual.
@@ -394,12 +412,12 @@ Transformar o período em fluxo controlado por participação individual.
 
 ### Checklist técnico sugerido
 
-- [ ] Implementar fechamento individual em transação, com atualização consistente do status do participante e do período.
-- [ ] Bloquear fechamento enquanto a dupla estiver incompleta.
-- [ ] Impedir edição e exclusão de despesas do participante após o fechamento.
-- [ ] Garantir que o outro participante continue podendo lançar e ajustar despesas enquanto estiver aberto.
-- [ ] Exibir status de cada participante de forma legível na interface.
-- [ ] Testar o fluxo em que uma pessoa fecha antes da outra e o período permanece parcialmente fechado.
+- [x] Implementar fechamento individual em transação, com atualização consistente do status do participante e do período.
+- [x] Bloquear fechamento enquanto a dupla estiver incompleta.
+- [x] Impedir edição e exclusão de despesas do participante após o fechamento.
+- [x] Garantir que o outro participante continue podendo lançar e ajustar despesas enquanto estiver aberto.
+- [x] Exibir status de cada participante de forma legível na interface.
+- [x] Testar o fluxo em que uma pessoa fecha antes da outra e o período permanece parcialmente fechado.
 
 ### Entregáveis
 
@@ -420,6 +438,8 @@ Transformar o período em fluxo controlado por participação individual.
 
 ## Etapa 10. Cálculo do resultado final
 
+Status: concluída
+
 ### Objetivo
 
 Entregar o principal valor do produto: calcular o acerto final de forma clara e confiável.
@@ -439,12 +459,12 @@ Entregar o principal valor do produto: calcular o acerto final de forma clara e 
 
 ### Checklist técnico sugerido
 
-- [ ] Centralizar a regra de cálculo em uma função ou serviço puro, fácil de testar.
-- [ ] Garantir que o resultado seja persistido de forma atômica quando o segundo participante fechar.
-- [ ] Tratar corretamente cenários com acerto positivo, acerto negativo implícito e acerto zero.
-- [ ] Construir tela de resultado com foco em clareza visual e leitura rápida no celular.
-- [ ] Exibir chave Pix do recebedor quando existir e estado alternativo quando não existir.
-- [ ] Cobrir com testes ao menos três cenários: uma pessoa deve pagar, outra deve pagar e ninguém deve nada.
+- [x] Centralizar a regra de cálculo em uma função ou serviço puro, fácil de testar.
+- [x] Garantir que o resultado seja persistido de forma atômica quando o segundo participante fechar.
+- [x] Tratar corretamente cenários com acerto positivo, acerto negativo implícito e acerto zero.
+- [x] Construir tela de resultado com foco em clareza visual e leitura rápida no celular.
+- [x] Exibir chave Pix do recebedor quando existir e estado alternativo quando não existir.
+- [x] Cobrir com testes ao menos três cenários: uma pessoa deve pagar, outra deve pagar e ninguém deve nada.
 
 ### Entregáveis
 
@@ -463,6 +483,8 @@ Entregar o principal valor do produto: calcular o acerto final de forma clara e 
 
 ## Etapa 11. Reabertura do período
 
+Status: concluída
+
 ### Objetivo
 
 Permitir correção de períodos encerrados com o mínimo de atrito.
@@ -478,12 +500,12 @@ Permitir correção de períodos encerrados com o mínimo de atrito.
 
 ### Checklist técnico sugerido
 
-- [ ] Garantir regra que permita reabrir apenas o último período encerrado da dupla.
-- [ ] Implementar confirmação explícita antes da reabertura.
-- [ ] Remover ou invalidar o resultado consolidado anterior de forma segura.
-- [ ] Reabrir período e participantes em uma única operação consistente.
-- [ ] Garantir que o novo cálculo só aconteça após novo fechamento completo.
-- [ ] Testar fluxo completo de reabrir, editar, fechar novamente e recalcular.
+- [x] Garantir regra que permita reabrir apenas o último período encerrado da dupla.
+- [x] Implementar confirmação explícita antes da reabertura.
+- [x] Remover ou invalidar o resultado consolidado anterior de forma segura.
+- [x] Reabrir período e participantes em uma única operação consistente.
+- [x] Garantir que o novo cálculo só aconteça após novo fechamento completo.
+- [x] Testar fluxo completo de reabrir, editar, fechar novamente e recalcular.
 
 ### Entregáveis
 
@@ -501,6 +523,8 @@ Permitir correção de períodos encerrados com o mínimo de atrito.
 
 ## Etapa 12. Histórico e arquivamento de dupla
 
+Status: concluída
+
 ### Objetivo
 
 Completar o fluxo de organização do uso contínuo do produto.
@@ -516,11 +540,11 @@ Completar o fluxo de organização do uso contínuo do produto.
 
 ### Checklist técnico sugerido
 
-- [ ] Criar consulta eficiente para histórico de períodos encerrados e resultados anteriores.
-- [ ] Construir área de duplas arquivadas separada da lista principal.
-- [ ] Implementar arquivamento sem perda de histórico ou vínculo de membros.
-- [ ] Implementar reativação devolvendo a dupla para a lista principal com estado íntegro.
-- [ ] Validar navegação entre dupla ativa, arquivada e histórico de resultados.
+- [x] Criar consulta eficiente para histórico de períodos encerrados e resultados anteriores.
+- [x] Construir área de duplas arquivadas separada da lista principal.
+- [x] Implementar arquivamento sem perda de histórico ou vínculo de membros.
+- [x] Implementar reativação devolvendo a dupla para a lista principal com estado íntegro.
+- [x] Validar navegação entre dupla ativa, arquivada e histórico de resultados.
 
 ### Entregáveis
 
@@ -539,6 +563,8 @@ Completar o fluxo de organização do uso contínuo do produto.
 
 ## Etapa 13. PWA
 
+Status: concluída
+
 ### Objetivo
 
 Transformar o produto em aplicação instalável com comportamento consistente em dispositivos compatíveis.
@@ -554,11 +580,11 @@ Transformar o produto em aplicação instalável com comportamento consistente e
 
 ### Checklist técnico sugerido
 
-- [ ] Definir estratégia de PWA e os requisitos mínimos para instalação na primeira versão.
-- [ ] Criar manifesto, ícones e metadados visuais coerentes com a identidade do produto.
-- [ ] Garantir comportamento instalável e navegação adequada quando aberto como app.
-- [ ] Validar instalação em Android e em desktop compatível.
-- [ ] Verificar se fluxos críticos como autenticação e convite continuam íntegros no modo instalado.
+- [x] Definir estratégia de PWA e os requisitos mínimos para instalação na primeira versão.
+- [x] Criar manifesto, ícones e metadados visuais coerentes com a identidade do produto.
+- [x] Garantir comportamento instalável e navegação adequada quando aberto como app.
+- [x] Validar instalação em Android e em desktop compatível.
+- [x] Verificar se fluxos críticos como autenticação e convite continuam íntegros no modo instalado.
 
 ### Entregáveis
 
@@ -576,6 +602,8 @@ Transformar o produto em aplicação instalável com comportamento consistente e
 
 ## Etapa 14. Polimento visual e experiência
 
+Status: concluída
+
 ### Objetivo
 
 Levar o produto do funcional para um nível de acabamento bom o suficiente para uso real e portfólio.
@@ -591,11 +619,11 @@ Levar o produto do funcional para um nível de acabamento bom o suficiente para 
 
 ### Checklist técnico sugerido
 
-- [ ] Revisar tela por tela a hierarquia visual das ações e informações principais.
-- [ ] Melhorar estados vazios, mensagens de erro e confirmações para reduzir ambiguidade.
-- [ ] Ajustar tipografia, contraste, espaçamento e tamanho de toque para uso frequente no celular.
-- [ ] Inserir animações leves apenas onde ajudam a compreensão do fluxo.
-- [ ] Fazer uma passada final de consistência visual entre telas, componentes e transições.
+- [x] Revisar tela por tela a hierarquia visual das ações e informações principais.
+- [x] Melhorar estados vazios, mensagens de erro e confirmações para reduzir ambiguidade.
+- [x] Ajustar tipografia, contraste, espaçamento e tamanho de toque para uso frequente no celular.
+- [x] Inserir animações leves apenas onde ajudam a compreensão do fluxo.
+- [x] Fazer uma passada final de consistência visual entre telas, componentes e transições.
 
 ### Entregáveis
 
@@ -612,6 +640,8 @@ Levar o produto do funcional para um nível de acabamento bom o suficiente para 
 - produto transmite confiança, clareza e acabamento acima de um CRUD comum
 
 ## Etapa 15. Testes, deploy e validação final
+
+Status: concluída
 
 ### Objetivo
 
@@ -632,12 +662,12 @@ Garantir que o fluxo principal esteja estável e preparado para o primeiro uso r
 
 ### Checklist técnico sugerido
 
-- [ ] Criar `seed` realista para demonstrar o produto e acelerar QA manual.
-- [ ] Cobrir com testes automatizados as regras críticas de convite, período ativo, fechamento, reabertura e cálculo.
-- [ ] Garantir ao menos um fluxo ponta a ponta automatizado ou rigidamente validado para login, convite, despesas e resultado.
-- [ ] Validar `lint`, `typecheck`, `build` e execução em modo de produção.
-- [ ] Preparar checklist de deploy na Hostinger, incluindo variáveis, banco, domínio, SSL, processo da aplicação e restart.
-- [ ] Definir rotina mínima de backup e ensaio de restauração antes do primeiro uso real.
+- [x] Criar `seed` realista para demonstrar o produto e acelerar QA manual.
+- [x] Cobrir com testes automatizados as regras críticas de convite, período ativo, fechamento, reabertura e cálculo.
+- [x] Garantir ao menos um fluxo ponta a ponta automatizado ou rigidamente validado para login, convite, despesas e resultado.
+- [x] Validar `lint`, `typecheck`, `build` e execução em modo de produção.
+- [x] Preparar checklist de deploy na Hostinger, incluindo variáveis, banco, domínio, SSL, processo da aplicação e restart.
+- [x] Definir rotina mínima de backup e ensaio de restauração antes do primeiro uso real.
 
 ### Entregáveis
 

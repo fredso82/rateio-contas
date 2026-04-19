@@ -1,0 +1,5 @@
+.agents
+.next
+agents.md
+node_modules
+package-lock.json
