@@ -4,12 +4,15 @@ import { auth } from "@/auth";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { isGoogleAuthEnabled } from "@/lib/auth-providers";
 import { linkGoogleAccount } from "@/server/auth/actions";
 import { getProfileSnapshot } from "@/server/profile/repository";
 
 const profileLinkErrorMessages: Record<string, string> = {
   ACCOUNT_LINK_REQUIRED:
     "Essa conta Google já corresponde a um usuário existente. Entre com seu método atual e vincule o Google por aqui.",
+  GOOGLE_NOT_AVAILABLE:
+    "O login com Google ainda nao esta disponivel neste ambiente.",
   GOOGLE_ACCOUNT_ALREADY_LINKED:
     "Essa conta Google já está vinculada a outro usuário.",
   GOOGLE_EMAIL_NOT_VERIFIED:
@@ -27,6 +30,7 @@ type ProfilePageProps = {
 
 export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const session = await auth();
+  const googleEnabled = isGoogleAuthEnabled();
 
   if (!session?.user?.id) {
     return null;
@@ -106,7 +110,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               <p className="text-sm text-muted">
                 {hasGoogleLinked
                   ? "Sua conta Google já está vinculada para acesso rápido."
-                  : "Você pode vincular o Google depois de entrar com seu método atual."}
+                  : googleEnabled
+                    ? "Você pode vincular o Google depois de entrar com seu método atual."
+                    : "O vinculo com Google aparece aqui quando a aplicacao estiver rodando em um dominio publico."}
               </p>
             </div>
           </div>
@@ -142,7 +148,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             isFirstAccess={!isProfileComplete}
           />
         </div>
-        {!hasGoogleLinked ? (
+        {!hasGoogleLinked && googleEnabled ? (
           <div className="mt-8 border-t border-line pt-6">
             <p className="text-sm font-semibold text-foreground">
               Vincular login com Google

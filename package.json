@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prepare:standalone": "node scripts/prepare-standalone.mjs",
+    "build:standalone": "npm run build && npm run prepare:standalone",
     "start": "next start",
+    "start:standalone": "node .next/standalone/server.js",
     "lint": "eslint .",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run --config src/test/config/vitest.unit.config.ts",

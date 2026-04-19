@@ -14,9 +14,10 @@ import { registerWithCredentials } from "@/server/auth/actions";
 
 type SignUpFormProps = {
   callbackUrl: string;
+  googleEnabled: boolean;
 };
 
-export function SignUpForm({ callbackUrl }: SignUpFormProps) {
+export function SignUpForm({ callbackUrl, googleEnabled }: SignUpFormProps) {
   const [state, formAction, isPending] = useActionState(
     registerWithCredentials,
     initialAuthActionState,
@@ -78,7 +79,7 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
             className="mt-2"
             id="password"
             name="password"
-            placeholder="Crie uma senha com 8+ caracteres"
+            placeholder="Crie uma senha com 6+ caracteres"
             type="password"
           />
           <FieldError message={state.fieldErrors?.password?.[0]} />
@@ -88,15 +89,22 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
           <ArrowRight className="size-4" />
         </Button>
       </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-line" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase tracking-[0.22em] text-muted">
-          <span className="bg-[var(--surface)] px-3">ou</span>
-        </div>
-      </div>
-      <GoogleSignInButton callbackUrl={callbackUrl} label="Criar com Google" />
+      {googleEnabled ? (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-line" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase tracking-[0.22em] text-muted">
+              <span className="bg-[var(--surface)] px-3">ou</span>
+            </div>
+          </div>
+          <GoogleSignInButton
+            callbackUrl={callbackUrl}
+            label="Criar com Google"
+          />
+        </>
+      ) : null}
       <p className="text-sm text-muted">
         Já tem conta?{" "}
         <Link
