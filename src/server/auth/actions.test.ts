@@ -99,7 +99,7 @@ describe("auth server actions", () => {
     expect(result.message).toBe("Revise os campos e tente novamente.");
     expect(result.fieldErrors?.email).toContain("Digite um email válido.");
     expect(result.fieldErrors?.password).toContain(
-      "Use pelo menos 8 caracteres.",
+      "Use pelo menos 6 caracteres.",
     );
     expect(signInMock).not.toHaveBeenCalled();
   });
@@ -194,6 +194,33 @@ describe("auth server actions", () => {
     });
     expect(loggerErrorMock).toHaveBeenCalled();
     expect(signInMock).not.toHaveBeenCalled();
+  });
+
+  it("rethrows Next redirect during registration sign-in without logging it", async () => {
+    const redirectError = Object.assign(new Error("NEXT_REDIRECT"), {
+      digest: "NEXT_REDIRECT;push;/convite/token-123;307;",
+    });
+
+    registerCredentialsUserMock.mockResolvedValue({
+      id: "user_123",
+      name: "Conta Teste",
+      email: "user@example.com",
+    });
+    signInMock.mockRejectedValue(redirectError);
+
+    await expect(
+      registerWithCredentials(
+        initialAuthActionState,
+        buildFormData({
+          name: "Conta Teste",
+          email: "user@example.com",
+          password: "12345678",
+          callbackUrl: "/convite/token-123",
+        }),
+      ),
+    ).rejects.toBe(redirectError);
+
+    expect(loggerErrorMock).not.toHaveBeenCalled();
   });
 
   it("starts the Google flow with a sanitized callback and supports logout", async () => {

@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+const scriptSrc = ["'self'", "'unsafe-inline'"];
+
+if (isDevelopment) {
+  scriptSrc.push("'unsafe-eval'");
+}
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
@@ -11,7 +18,7 @@ const securityHeaders = [
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "object-src 'none'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src ${scriptSrc.join(" ")}`,
       "style-src 'self' 'unsafe-inline'",
       "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
       "frame-src https://accounts.google.com",

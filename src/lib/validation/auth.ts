@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const passwordSchema = z
   .string()
-  .min(8, "Use pelo menos 8 caracteres.")
+  .min(6, "Use pelo menos 6 caracteres.")
   .max(72, "Use no máximo 72 caracteres.");
 
 export const signInSchema = z.object({
