@@ -31,7 +31,7 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <section>
         <Card className="overflow-hidden p-8 sm:p-10" variant="accent">
           <p className="eyebrow text-xs font-semibold text-brand">
             MVP em construção real
@@ -53,57 +53,6 @@ export default async function HomePage() {
             <Button asChild size="lg" variant="secondary">
               <Link href="/entrar">Entrar com conta existente</Link>
             </Button>
-          </div>
-          <div className="mt-10 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.5rem] border border-white/55 bg-white/65 p-4">
-              <p className="text-sm text-muted">Sessão</p>
-              <p className="mt-1 font-display text-3xl leading-none">
-                Persistida
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/55 bg-white/65 p-4">
-              <p className="text-sm text-muted">Login</p>
-              <p className="mt-1 font-display text-3xl leading-none">
-                Email + Google
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/55 bg-white/65 p-4">
-              <p className="text-sm text-muted">Deploy</p>
-              <p className="mt-1 font-display text-3xl leading-none">
-                VPS ready
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="flex flex-col justify-between p-6 sm:p-8">
-          <div>
-            <p className="eyebrow text-xs font-semibold text-muted">
-              Estado atual
-            </p>
-            <h2 className="font-display mt-4 text-4xl leading-none">
-              Base sólida para as próximas etapas.
-            </h2>
-          </div>
-          <div className="mt-8 space-y-4">
-            <div className="rounded-[1.5rem] border border-line-strong bg-white/75 p-4">
-              <p className="text-sm font-semibold text-brand">Etapa 1</p>
-              <p className="mt-1 text-sm text-muted">
-                Next.js, Tailwind, Prisma, envs, scripts e build de produção.
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-line-strong bg-white/75 p-4">
-              <p className="text-sm font-semibold text-brand">Etapa 2</p>
-              <p className="mt-1 text-sm text-muted">
-                Tokens visuais, layout público/privado e componentes base.
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-line-strong bg-white/75 p-4">
-              <p className="text-sm font-semibold text-brand">Etapa 3</p>
-              <p className="mt-1 text-sm text-muted">
-                Cadastro, login, Google, sessão persistida e proteção de rotas.
-              </p>
-            </div>
           </div>
         </Card>
       </section>

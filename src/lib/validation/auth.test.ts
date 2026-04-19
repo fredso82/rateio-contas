@@ -6,12 +6,12 @@ describe("auth validation schemas", () => {
   it("normalizes a valid sign-in payload", () => {
     const result = signInSchema.parse({
       email: "  USER@Example.com ",
-      password: "12345678",
+      password: "123456",
     });
 
     expect(result).toEqual({
       email: "USER@Example.com",
-      password: "12345678",
+      password: "123456",
     });
   });
 
@@ -28,7 +28,7 @@ describe("auth validation schemas", () => {
         "Digite um email válido.",
       );
       expect(result.error.flatten().fieldErrors.password).toContain(
-        "Use pelo menos 8 caracteres.",
+        "Use pelo menos 6 caracteres.",
       );
     }
   });
@@ -37,7 +37,7 @@ describe("auth validation schemas", () => {
     const result = signUpSchema.safeParse({
       name: " ",
       email: "user@example.com",
-      password: "12345678",
+      password: "123456",
     });
 
     expect(result.success).toBe(false);
