@@ -15,7 +15,7 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
     <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-4 sm:px-6">
       <header className="glass-card flex items-center justify-between rounded-[2rem] border px-5 py-4">
         <div>
-          <Link className="inline-flex items-center gap-3" href="/app/duplas">
+          <Link className="inline-flex items-center gap-3" href="/app">
             <div className="flex size-11 items-center justify-center rounded-[1.2rem] bg-foreground text-background">
               <Sparkles className="size-5" />
             </div>

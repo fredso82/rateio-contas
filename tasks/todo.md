@@ -122,3 +122,19 @@
 - A camada de erro passou a expor mensagens genéricas para falhas inesperadas e os logs passaram a serializar erros sem despejar objetos crus.
 - O app agora aplica `CSP`, `HSTS`, `Referrer-Policy`, `X-Frame-Options`, `X-Content-Type-Options` e `Permissions-Policy` via `next.config.ts`.
 - As validações executadas nesta entrega foram: `npm run db:generate`, `npm run typecheck`, `npm test`, `npm run lint` e `npm run build`.
+
+## Tarefas atuais
+
+- [x] Tornar `/app` uma entrada dinâmica para dupla/período
+- [x] Reaproveitar a entrada dinâmica no fluxo pós-primeiro-perfil e no shell
+- [x] Embutir o lançamento de despesa na página do período atual
+- [x] Cobrir a navegação nova e o composer com testes automatizados
+- [x] Validar `test:unit`, `typecheck` e `lint`
+
+## Revisão atual
+
+- `/app` agora resolve o workspace principal do usuário: período aberto quando houver uma única dupla ativa com ciclo em andamento, detalhe da única dupla ativa sem período utilizável ou a lista de duplas nos demais cenários.
+- O fluxo de primeiro preenchimento de perfil agora volta para `/app`, reaproveitando a mesma lógica de entrada, e o link principal do shell também passou a apontar para essa entrada dinâmica.
+- A página do período atual virou o hub operacional do uso diário, com formulário inline de despesa acima da lista e link secundário para a tela dedicada.
+- A nova cobertura unitária valida tanto a resolução do workspace principal quanto a regra de exibição do composer inline.
+- As validações executadas nesta entrega foram: `npm run test:unit`, `npm run typecheck` e `npm run lint`.

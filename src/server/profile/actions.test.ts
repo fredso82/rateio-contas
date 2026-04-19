@@ -91,7 +91,7 @@ describe("profile actions", () => {
     expect(saveUserProfileMock).not.toHaveBeenCalled();
   });
 
-  it("redirects to the pairs area after the first profile completion", async () => {
+  it("redirects to the dynamic app entry after the first profile completion", async () => {
     authMock.mockResolvedValue({
       user: {
         id: "user_123",
@@ -109,7 +109,7 @@ describe("profile actions", () => {
           pixKey: "pix@teste",
         }),
       ),
-    ).rejects.toThrow("NEXT_REDIRECT:/app/duplas");
+    ).rejects.toThrow("NEXT_REDIRECT:/app");
 
     expect(saveUserProfileMock).toHaveBeenCalledWith("user_123", {
       name: "Conta Teste",

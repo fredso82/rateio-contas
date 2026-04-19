@@ -57,7 +57,7 @@ export async function saveProfile(
   revalidatePath("/app/duplas");
 
   if (result.completedForTheFirstTime) {
-    redirect("/app/duplas");
+    redirect("/app");
   }
 
   return {

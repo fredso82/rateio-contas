@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowUpRight,
   ArrowLeft,
   CalendarRange,
   CheckCircle2,
@@ -13,18 +14,22 @@ import {
 } from "lucide-react";
 
 import { auth } from "@/auth";
+import { ExpenseForm } from "@/components/periods/expense-form";
 import { PixKeyCopyButton } from "@/components/periods/pix-key-copy-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
+import { shouldShowInlineExpenseComposer } from "@/lib/periods";
 import {
   closeViewerPeriodParticipation,
+  createPeriodExpense,
   deletePeriodExpense,
   openPairPeriod,
   reopenViewerPeriod,
 } from "@/server/periods/actions";
 import { getPairPeriodWorkspace } from "@/server/periods/repository";
 import {
+  dateToInputValue,
   formatCurrencyFromCents,
   formatProductDate,
   formatProductDateTime,
@@ -103,6 +108,7 @@ export default async function PairPeriodPage({
   }
 
   const settlement = period.settlement;
+  const showInlineExpenseComposer = shouldShowInlineExpenseComposer(period);
 
   return (
     <div className="space-y-6">
@@ -155,57 +161,84 @@ export default async function PairPeriodPage({
         </Card>
       ) : null}
 
-      <Card className="overflow-hidden p-7 sm:p-8" variant="accent">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="eyebrow text-xs font-semibold text-brand">
-              {pair.name}
-            </p>
-            <h1 className="font-display mt-5 text-5xl leading-none">
-              {period.label}
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-muted">
-              {period.status === "open"
-                ? "Período pronto para receber lançamentos dos gastos do dia a dia."
-                : period.status === "partially_closed"
-                  ? "Uma pessoa já fechou a participação. A outra ainda pode ajustar as próprias despesas."
-                  : period.isHistoricalView
-                    ? "Resultado consolidado e preservado no histórico da dupla."
-                    : "Período encerrado com resultado persistido para consulta rápida ou reabertura controlada."}
-            </p>
-          </div>
-
-          <div className="grid gap-3 text-sm text-muted sm:text-right">
-            <div>
-              <p className="font-semibold text-foreground">
-                {getPeriodStatusText(period.status)}
-              </p>
-              <p>Aberto em {formatProductDateTime(period.openedAt)}</p>
-            </div>
-            {period.closedAt ? (
-              <div>
-                <p className="font-semibold text-foreground">
-                  Fechamento final
-                </p>
-                <p>{formatProductDateTime(period.closedAt)}</p>
-              </div>
-            ) : null}
-            {period.reopenedAt ? (
-              <div>
-                <p className="font-semibold text-foreground">
-                  Última reabertura
-                </p>
-                <p>{formatProductDateTime(period.reopenedAt)}</p>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </Card>
-
       <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-4">
+          <Card className="overflow-hidden p-5 sm:p-6" variant="accent">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow text-xs font-semibold text-brand">
+                    {pair.name}
+                  </p>
+                  <h1 className="font-display mt-3 text-3xl leading-none sm:text-4xl">
+                    {period.label}
+                  </h1>
+                  <p className="mt-3 text-sm text-muted">
+                    <span className="font-semibold text-foreground">
+                      {getPeriodStatusText(period.status)}
+                    </span>{" "}
+                    · aberto em {formatProductDateTime(period.openedAt)}
+                  </p>
+                  {period.closedAt ? (
+                    <p className="mt-1 text-sm text-muted">
+                      Fechamento final em {formatProductDateTime(period.closedAt)}
+                    </p>
+                  ) : null}
+                  {period.reopenedAt ? (
+                    <p className="mt-1 text-sm text-muted">
+                      Reaberto em {formatProductDateTime(period.reopenedAt)}
+                    </p>
+                  ) : null}
+                </div>
+
+                {showInlineExpenseComposer ? (
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/app/duplas/${pairId}/periodo/despesas/nova`}>
+                      Tela dedicada
+                      <ArrowUpRight className="size-4" />
+                    </Link>
+                  </Button>
+                ) : null}
+              </div>
+
+              {showInlineExpenseComposer ? (
+                <div className="rounded-[1.5rem] border border-line-strong bg-white/70 p-4 sm:p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        Nova despesa
+                      </p>
+                      <p className="mt-1 text-sm text-muted">
+                        Preencha e salve sem sair desta tela.
+                      </p>
+                    </div>
+                  </div>
+
+                  <ExpenseForm
+                    action={createPeriodExpense}
+                    defaultAmount=""
+                    defaultDescription=""
+                    defaultOccurredOn={dateToInputValue(new Date())}
+                    pairId={pairId}
+                    pendingLabel="Salvando despesa..."
+                    periodId={period.id}
+                    submitLabel="Salvar despesa"
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-muted">
+                  {period.status === "partially_closed"
+                    ? "Uma pessoa já fechou a participação. A outra ainda pode ajustar as próprias despesas."
+                    : period.isHistoricalView
+                      ? "Resultado consolidado e preservado no histórico da dupla."
+                      : "Período encerrado com resultado persistido para consulta rápida ou reabertura controlada."}
+                </p>
+              )}
+            </div>
+          </Card>
+
           <Card className="p-6">
-            <div className="flex items-center justify-between gap-4">
+            <div>
               <div>
                 <p className="text-sm font-semibold text-foreground">
                   Despesas do período
@@ -214,15 +247,6 @@ export default async function PairPeriodPage({
                   As despesas sempre ficam vinculadas a quem lançou cada gasto.
                 </p>
               </div>
-
-              {period.canCreateExpense ? (
-                <Button asChild>
-                  <Link href={`/app/duplas/${pairId}/periodo/despesas/nova`}>
-                    Nova despesa
-                    <Plus className="size-4" />
-                  </Link>
-                </Button>
-              ) : null}
             </div>
 
             {period.expenses.length === 0 ? (
