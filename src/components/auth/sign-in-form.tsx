@@ -15,9 +15,14 @@ import { loginWithCredentials } from "@/server/auth/actions";
 type SignInFormProps = {
   callbackUrl: string;
   errorMessage?: string | null;
+  googleEnabled: boolean;
 };
 
-export function SignInForm({ callbackUrl, errorMessage }: SignInFormProps) {
+export function SignInForm({
+  callbackUrl,
+  errorMessage,
+  googleEnabled,
+}: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(
     loginWithCredentials,
     initialAuthActionState,
@@ -77,15 +82,19 @@ export function SignInForm({ callbackUrl, errorMessage }: SignInFormProps) {
           <ArrowRight className="size-4" />
         </Button>
       </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-line" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase tracking-[0.22em] text-muted">
-          <span className="bg-[var(--surface)] px-3">ou</span>
-        </div>
-      </div>
-      <GoogleSignInButton callbackUrl={callbackUrl} />
+      {googleEnabled ? (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-line" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase tracking-[0.22em] text-muted">
+              <span className="bg-[var(--surface)] px-3">ou</span>
+            </div>
+          </div>
+          <GoogleSignInButton callbackUrl={callbackUrl} />
+        </>
+      ) : null}
       <p className="text-sm text-muted">
         Ainda não tem conta?{" "}
         <Link

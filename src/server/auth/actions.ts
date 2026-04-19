@@ -2,9 +2,11 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { AuthError } from "next-auth";
 
 import { auth, signIn, signOut } from "@/auth";
+import { isGoogleAuthEnabled } from "@/lib/auth-providers";
 import { getErrorMessage, logServerError } from "@/lib/errors";
 import { sanitizeRedirect } from "@/lib/navigation";
 import {
@@ -73,6 +75,10 @@ export async function loginWithCredentials(
       redirectTo: callbackUrl,
     });
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     if (error instanceof AuthError) {
       return {
         status: "error",
@@ -124,6 +130,10 @@ export async function registerWithCredentials(
       redirectTo: callbackUrl,
     });
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     if (error instanceof AuthError) {
       return {
         status: "error",
@@ -146,6 +156,10 @@ export async function registerWithCredentials(
 }
 
 export async function continueWithGoogle(formData: FormData) {
+  if (!isGoogleAuthEnabled()) {
+    redirect("/entrar?error=GOOGLE_NOT_AVAILABLE");
+  }
+
   const clientIp = await getClientIp();
 
   assertRateLimit({
@@ -164,6 +178,10 @@ export async function linkGoogleAccount() {
 
   if (!session?.user?.id) {
     redirect("/entrar?callbackUrl=%2Fapp%2Fperfil");
+  }
+
+  if (!isGoogleAuthEnabled()) {
+    redirect("/app/perfil?linkError=GOOGLE_NOT_AVAILABLE");
   }
 
   const clientIp = await getClientIp();

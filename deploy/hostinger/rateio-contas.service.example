@@ -1,0 +1,21 @@
+[Unit]
+Description=rateio-contas
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/var/www/rateio-contas
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+EnvironmentFile=/var/www/rateio-contas/.env.production
+ExecStart=/usr/bin/node /var/www/rateio-contas/.next/standalone/server.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
